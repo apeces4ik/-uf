@@ -50,7 +50,10 @@ const ContactsPage = () => {
     } catch (error) {
       console.error("Error sending contact message:", error);
       toast({
+        title: "Ошибка отправки",
+        description: "Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте позже.",
         variant: "destructive",
+      });
         title: "Ошибка отправки",
         description: "Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте позже.",
       });
