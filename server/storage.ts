@@ -10,6 +10,16 @@ import { contactMessages, type ContactMessage, type InsertContactMessage } from 
 import { clubHistory, type History, type InsertHistory } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { scrypt, randomBytes } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
 
 const MemoryStore = createMemoryStore(session);
 
@@ -139,11 +149,13 @@ export class MemStorage implements IStorage {
     });
     
     // Initialize with a default admin
-    this.createUser({
-      username: "admin",
-      password: "c30d9b00fd8546a211b33fdf08ebb3c0aeaf32acd2b9eb0eb2e1e1c2fe9acd81af99d51e2076303e28cbf0df987a2ede9e2c2c2a0b589f1ddb97c8dd08823a2.b77cb5f6eefe9af7f04a0c48aae49150", // admin123
-    }).then(user => {
-      this.users.set(user.id, {...user, isAdmin: true});
+    hashPassword("admin123").then(hashedPassword => {
+      this.createUser({
+        username: "admin",
+        password: hashedPassword,
+      }).then(user => {
+        this.users.set(user.id, {...user, isAdmin: true});
+      });
     });
     
     // Initialize with some dummy data for development
