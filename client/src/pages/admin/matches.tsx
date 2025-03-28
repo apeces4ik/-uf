@@ -130,7 +130,7 @@ export default function AdminMatches() {
   // Delete match mutation
   const deleteMatchMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/matches/${id}`);
+      await apiRequest('DELETE', `/api/matches/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/matches'] });
