@@ -38,13 +38,22 @@ const ContactsPage = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      await apiRequest('/api/contact', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          subject: data.subject,
+          message: data.message
+        })
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
       toast({
         title: "Сообщение отправлено",
