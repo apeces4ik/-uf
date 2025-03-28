@@ -34,7 +34,6 @@ function Router() {
       <Route path="/matches" component={MatchesPage} />
       <Route path="/news" component={NewsPage} />
       <Route path="/media" component={MediaPage} />
-
       <Route path="/contacts" component={ContactsPage} />
       <Route path="/history" component={HistoryPage} />
       <Route path="/auth" component={AuthPage} />

@@ -76,7 +76,7 @@ export default function AdminNews() {
   // Create news mutation
   const addNewsMutation = useMutation({
     mutationFn: async (newsItem: InsertNews) => {
-      const res = await apiRequest('POST', '/api/admin/news', newsItem);
+      const res = await apiRequest('POST', '/api/news', newsItem);
       return await res.json();
     },
     onSuccess: () => {
@@ -100,7 +100,7 @@ export default function AdminNews() {
   // Update news mutation
   const updateNewsMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: Partial<InsertNews> }) => {
-      const res = await apiRequest('PUT', `/api/admin/news/${id}`, data);
+      const res = await apiRequest('PUT', `/api/news/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {
@@ -123,7 +123,7 @@ export default function AdminNews() {
   // Delete news mutation
   const deleteNewsMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/news/${id}`);
+      await apiRequest('DELETE', `/api/news/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/news'] });

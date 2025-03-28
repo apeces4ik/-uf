@@ -243,8 +243,14 @@ export default function AdminMedia() {
   };
 
   // Format date nicely
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMMM yyyy', { locale: ru });
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Неизвестно';
+    try {
+      return format(new Date(dateString), 'dd MMMM yyyy', { locale: ru });
+    } catch (error) {
+      console.error('Invalid date format:', dateString, error);
+      return 'Неизвестно';
+    }
   };
 
   // Filter media based on type, search query and album
@@ -253,7 +259,12 @@ export default function AdminMedia() {
       item.type === activeTab && 
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
-    .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+    .sort((a, b) => {
+      // Безопасная сортировка с проверкой на null/undefined
+      const dateA = a.uploadDate ? new Date(a.uploadDate).getTime() : 0;
+      const dateB = b.uploadDate ? new Date(b.uploadDate).getTime() : 0;
+      return dateB - dateA;
+    });
 
   // YouTube embed code helper
   const getYouTubeEmbedUrl = (url: string) => {
