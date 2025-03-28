@@ -454,6 +454,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Albums
+  app.get("/api/albums", async (req, res) => {
+    try {
+      // Получить все альбомы
+      // Поскольку отдельного метода для получения альбомов нет, используем getMedia с фильтрацией
+      const mediaItems = await storage.getMedia();
+      // Получаем уникальные albumId
+      const albumIds = [...new Set(mediaItems
+        .filter(item => item.albumId !== null && item.albumId !== undefined)
+        .map(item => item.albumId))];
+      
+      // Формируем объекты альбомов с заглушками
+      const albums = albumIds.map(id => ({
+        id,
+        title: `Альбом ${id}`,
+        description: null,
+        coverUrl: null,
+      }));
+      
+      res.json(albums);
+    } catch (error) {
+      res.status(500).json({ error: "Ошибка при получении альбомов" });
+    }
+  });
+  
+  app.post("/api/albums", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Доступ запрещен" });
+      }
+      
+      // Поскольку нет прямого метода для создания альбома, 
+      // мы создаем медиа-элемент с типом "album"
+      const mediaItem = await storage.createMedia({
+        title: req.body.title,
+        type: "album",
+        url: req.body.coverUrl || "",
+        description: req.body.description || null,
+      });
+      
+      // Возвращаем созданный "альбом"
+      const album = {
+        id: mediaItem.id,
+        title: mediaItem.title,
+        description: mediaItem.description || null,
+        coverUrl: mediaItem.url,
+      };
+      
+      res.status(201).json(album);
+    } catch (error) {
+      res.status(500).json({ error: "Ошибка при создании альбома" });
+    }
+  });
+  
   // Media
   app.get("/api/media", async (req, res) => {
     try {

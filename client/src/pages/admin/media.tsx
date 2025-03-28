@@ -79,7 +79,7 @@ export default function AdminMedia() {
   // Create media mutation
   const addMediaMutation = useMutation({
     mutationFn: async (media: InsertMedia) => {
-      const res = await apiRequest('POST', '/api/admin/media', media);
+      const res = await apiRequest('POST', '/api/media', media);
       return await res.json();
     },
     onSuccess: () => {
@@ -103,7 +103,7 @@ export default function AdminMedia() {
   // Create album mutation
   const addAlbumMutation = useMutation({
     mutationFn: async (album: InsertAlbum) => {
-      const res = await apiRequest('POST', '/api/admin/albums', album);
+      const res = await apiRequest('POST', '/api/albums', album);
       return await res.json();
     },
     onSuccess: () => {
@@ -127,7 +127,7 @@ export default function AdminMedia() {
   // Update media mutation
   const updateMediaMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: Partial<InsertMedia> }) => {
-      const res = await apiRequest('PUT', `/api/admin/media/${id}`, data);
+      const res = await apiRequest('PUT', `/api/media/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {
@@ -150,7 +150,7 @@ export default function AdminMedia() {
   // Delete media mutation
   const deleteMediaMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/media/${id}`);
+      await apiRequest('DELETE', `/api/media/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
