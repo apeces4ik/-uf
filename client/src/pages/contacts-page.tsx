@@ -56,10 +56,7 @@ const ContactsPage = () => {
       });
     } finally {
       setIsSubmitting(false);
-    }равки",
-        description: "Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте позже.",
-        variant: "destructive",
-      });
+    }
     } finally {
       setIsSubmitting(false);
     }
