@@ -9,6 +9,7 @@ import NewsSection from '@/components/news-section';
 import MediaSection from '@/components/media-section';
 import BlogPreview from '@/components/blog-preview';
 import { useQuery } from '@tanstack/react-query';
+import { getQueryFn } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';

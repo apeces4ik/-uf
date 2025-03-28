@@ -5,6 +5,11 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        'roboto': ['var(--font-roboto)'],
+        'roboto-condensed': ['var(--font-roboto-condensed)'],
+        'oswald': ['var(--font-oswald)'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
