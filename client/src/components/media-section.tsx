@@ -75,8 +75,8 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
               alt={selectedMedia?.title}
               className="w-full max-h-[60vh] object-contain rounded-lg"
             />
-            <h3 className="text-xl font-semibold">{selectedMedia?.title}</h3>
-            <p className="text-gray-600 text-center">{selectedMedia?.description}</p>
+            <h3 className="text-xl font-bold">{selectedMedia?.title}</h3>
+            <p className="text-gray-600 text-center whitespace-pre-wrap">{selectedMedia?.description}</p>
             <div className="text-sm text-gray-500">
               {selectedMedia?.date ? new Date(selectedMedia.date).toLocaleDateString('ru-RU') : ''}
             </div>
