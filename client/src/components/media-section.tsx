@@ -68,17 +68,18 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
       </div>
 
       <Dialog open={selectedMedia !== null} onOpenChange={setSelectedMedia}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedMedia?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
+        <DialogContent className="max-w-3xl">
+          <div className="flex flex-col items-center gap-4">
             <img
               src={selectedMedia?.url}
               alt={selectedMedia?.title}
-              className="w-full h-64 object-cover rounded-lg mb-4"
+              className="w-full max-h-[60vh] object-contain rounded-lg"
             />
-            <p className="text-gray-600">{selectedMedia?.description}</p>
+            <h3 className="text-xl font-semibold">{selectedMedia?.title}</h3>
+            <p className="text-gray-600 text-center">{selectedMedia?.description}</p>
+            <div className="text-sm text-gray-500">
+              {selectedMedia?.date ? new Date(selectedMedia.date).toLocaleDateString('ru-RU') : ''}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
