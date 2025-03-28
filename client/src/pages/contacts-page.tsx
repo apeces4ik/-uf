@@ -39,13 +39,20 @@ const ContactsPage = () => {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      await apiRequest("POST", "/api/contact", data);
-      toast({
-        title: "Сообщение отправлено",
-        description: "Благодарим за обращение! Мы свяжемся с вами в ближайшее время.",
-      });
-      form.reset();
+      const response = await apiRequest("POST", "/api/contact", data);
+      const result = await response.json();
+      
+      if (result.success) {
+        toast({
+          title: "Сообщение отправлено",
+          description: "Благодарим за обращение! Мы свяжемся с вами в ближайшее время.",
+        });
+        form.reset();
+      } else {
+        throw new Error(result.error || "Ошибка при отправке");
+      }
     } catch (error) {
+      console.error("Error sending contact message:", error);
       toast({
         title: "Ошибка отправки",
         description: "Произошла ошибка при отправке сообщения. Пожалуйста, попробуйте позже.",
