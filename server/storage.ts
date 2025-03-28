@@ -893,6 +893,35 @@ export class MemStorage implements IStorage {
     for (const item of historyData) {
       await this.createHistory(item);
     }
+    
+    // Seed contact messages
+    const contactMessagesData: InsertContactMessage[] = [
+      {
+        name: "Иван Петров",
+        email: "ivan@example.com",
+        subject: "Вопрос о билетах",
+        message: "Здравствуйте! Подскажите, пожалуйста, когда начнется продажа билетов на матч с Динамо?",
+        date: "2023-05-10"
+      },
+      {
+        name: "Мария Иванова",
+        email: "maria@example.com",
+        subject: "Сотрудничество",
+        message: "Добрый день! Наша компания хотела бы обсудить возможности сотрудничества с вашим клубом. Как мы можем организовать встречу?",
+        date: "2023-05-08"
+      },
+      {
+        name: "Алексей Смирнов",
+        email: "alexey@example.com",
+        subject: "Детская школа",
+        message: "Здравствуйте! Хотел бы узнать, как можно записать ребенка в вашу детскую футбольную школу. Какие документы нужны и есть ли сейчас свободные места?",
+        date: "2023-05-05"
+      }
+    ];
+    
+    for (const message of contactMessagesData) {
+      await this.createContactMessage(message);
+    }
   }
 }
 

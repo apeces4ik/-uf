@@ -133,6 +133,8 @@ export const media = pgTable("media", {
   date: text("date").notNull(),
   duration: text("duration"), // for videos
   views: integer("views").default(0),
+  albumId: integer("album_id"),
+  uploadDate: text("upload_date"),
 });
 
 export const insertMediaSchema = createInsertSchema(media).omit({

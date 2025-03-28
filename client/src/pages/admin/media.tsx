@@ -58,22 +58,12 @@ export default function AdminMedia() {
 
   // Fetch media
   const { data: mediaItems, isLoading: isLoadingMedia } = useQuery<Media[]>({
-    queryKey: ['/api/media'],
-    queryFn: async () => {
-      const response = await fetch('/api/media');
-      if (!response.ok) throw new Error('Не удалось загрузить медиа');
-      return response.json();
-    }
+    queryKey: ['/api/media']
   });
 
   // Fetch albums
   const { data: albums, isLoading: isLoadingAlbums } = useQuery<Album[]>({
-    queryKey: ['/api/albums'],
-    queryFn: async () => {
-      const response = await fetch('/api/albums');
-      if (!response.ok) throw new Error('Не удалось загрузить альбомы');
-      return response.json();
-    }
+    queryKey: ['/api/albums']
   });
 
   // Create media mutation
