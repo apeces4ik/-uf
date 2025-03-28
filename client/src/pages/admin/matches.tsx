@@ -225,14 +225,14 @@ export default function AdminMatches() {
   const upcomingMatches = matches
     ?.filter(match => 
       match.status === 'upcoming' && 
-      match.competitionType.toLowerCase().includes(searchQuery.toLowerCase())
+      (match.competitionType ? match.competitionType.toLowerCase().includes(searchQuery.toLowerCase()) : true)
     )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
   const pastMatches = matches
     ?.filter(match => 
       match.status === 'finished' && 
-      match.competitionType.toLowerCase().includes(searchQuery.toLowerCase())
+      (match.competitionType ? match.competitionType.toLowerCase().includes(searchQuery.toLowerCase()) : true)
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
