@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertPlayerSchema, insertCoachSchema, insertMatchSchema, insertNewsSchema, insertBlogPostSchema, insertMediaSchema, insertStandingSchema, insertContactMessageSchema } from "@shared/schema";
+import { insertPlayerSchema, insertCoachSchema, insertMatchSchema, insertNewsSchema, insertBlogPostSchema, insertMediaSchema, insertStandingSchema, insertContactMessageSchema, insertHistorySchema } from "@shared/schema";
 import { format } from "date-fns";
 import { z } from "zod";
 
@@ -675,6 +675,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Ошибка при удалении сообщения" });
+    }
+  });
+  
+  // Club History
+  app.get("/api/history", async (req, res) => {
+    try {
+      const historyItems = await storage.getHistory();
+      res.json(historyItems);
+    } catch (error) {
+      res.status(500).json({ error: "Ошибка при получении истории клуба" });
+    }
+  });
+  
+  app.get("/api/history/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const historyItem = await storage.getHistoryById(id);
+      
+      if (!historyItem) {
+        return res.status(404).json({ error: "Запись истории не найдена" });
+      }
+      
+      res.json(historyItem);
+    } catch (error) {
+      res.status(500).json({ error: "Ошибка при получении записи истории" });
+    }
+  });
+  
+  app.post("/api/history", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Доступ запрещен" });
+      }
+      
+      const validatedData = insertHistorySchema.parse(req.body);
+      const historyItem = await storage.createHistory(validatedData);
+      res.status(201).json(historyItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Ошибка при создании записи истории" });
+    }
+  });
+  
+  app.put("/api/history/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Доступ запрещен" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const validatedData = insertHistorySchema.partial().parse(req.body);
+      const historyItem = await storage.updateHistory(id, validatedData);
+      
+      if (!historyItem) {
+        return res.status(404).json({ error: "Запись истории не найдена" });
+      }
+      
+      res.json(historyItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Ошибка при обновлении записи истории" });
+    }
+  });
+  
+  app.delete("/api/history/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Доступ запрещен" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteHistory(id);
+      
+      if (!success) {
+        return res.status(404).json({ error: "Запись истории не найдена" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Ошибка при удалении записи истории" });
     }
   });
 

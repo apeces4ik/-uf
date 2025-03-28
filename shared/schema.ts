@@ -181,3 +181,20 @@ export const insertContactMessageSchema = createInsertSchema(contactMessages).om
 
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
+
+// Club History
+export const clubHistory = pgTable("club_history", {
+  id: serial("id").primaryKey(),
+  year: integer("year").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url"),
+  importance: integer("importance").default(1), // 1-3, where 3 is most important
+});
+
+export const insertHistorySchema = createInsertSchema(clubHistory).omit({
+  id: true,
+});
+
+export type InsertHistory = z.infer<typeof insertHistorySchema>;
+export type History = typeof clubHistory.$inferSelect;

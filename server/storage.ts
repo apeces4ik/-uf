@@ -7,6 +7,7 @@ import { blogPosts, type BlogPost, type InsertBlogPost } from "@shared/schema";
 import { media, type Media, type InsertMedia } from "@shared/schema";
 import { standings, type Standing, type InsertStanding } from "@shared/schema";
 import { contactMessages, type ContactMessage, type InsertContactMessage } from "@shared/schema";
+import { clubHistory, type History, type InsertHistory } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -74,6 +75,13 @@ export interface IStorage {
   markContactMessageAsRead(id: number): Promise<ContactMessage | undefined>;
   deleteContactMessage(id: number): Promise<boolean>;
   
+  // Club History
+  getHistory(): Promise<History[]>;
+  getHistoryById(id: number): Promise<History | undefined>;
+  createHistory(history: InsertHistory): Promise<History>;
+  updateHistory(id: number, history: Partial<InsertHistory>): Promise<History | undefined>;
+  deleteHistory(id: number): Promise<boolean>;
+  
   // Session store
   sessionStore: session.SessionStore;
 }
@@ -88,6 +96,7 @@ export class MemStorage implements IStorage {
   private mediaItems: Map<number, Media>;
   private standingItems: Map<number, Standing>;
   private contactMessages: Map<number, ContactMessage>;
+  private historyItems: Map<number, History>;
   
   sessionStore: session.SessionStore;
   
@@ -100,6 +109,7 @@ export class MemStorage implements IStorage {
   private mediaIdCounter: number;
   private standingIdCounter: number;
   private messageIdCounter: number;
+  private historyIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -111,6 +121,7 @@ export class MemStorage implements IStorage {
     this.mediaItems = new Map();
     this.standingItems = new Map();
     this.contactMessages = new Map();
+    this.historyItems = new Map();
     
     this.userIdCounter = 1;
     this.playerIdCounter = 1;
@@ -121,6 +132,7 @@ export class MemStorage implements IStorage {
     this.mediaIdCounter = 1;
     this.standingIdCounter = 1;
     this.messageIdCounter = 1;
+    this.historyIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // Prune expired entries every day
@@ -129,7 +141,7 @@ export class MemStorage implements IStorage {
     // Initialize with a default admin
     this.createUser({
       username: "admin",
-      password: "$2b$10$kfX0KVFsnKqdoLlV1xFGu.3x7Q04PUAIe5LnDzDvGjAozPdU2MFUK", // password is "admin123"
+      password: "c30d9b00fd8546a211b33fdf08ebb3c0aeaf32acd2b9eb0eb2e1e1c2fe9acd81af99d51e2076303e28cbf0df987a2ede9e2c2c2a0b589f1ddb97c8dd08823a2.b77cb5f6eefe9af7f04a0c48aae49150", // admin123
     }).then(user => {
       this.users.set(user.id, {...user, isAdmin: true});
     });
@@ -410,6 +422,36 @@ export class MemStorage implements IStorage {
   
   async deleteContactMessage(id: number): Promise<boolean> {
     return this.contactMessages.delete(id);
+  }
+  
+  // Club History
+  async getHistory(): Promise<History[]> {
+    return Array.from(this.historyItems.values())
+      .sort((a, b) => a.year - b.year); // Sort by year ascending
+  }
+  
+  async getHistoryById(id: number): Promise<History | undefined> {
+    return this.historyItems.get(id);
+  }
+  
+  async createHistory(history: InsertHistory): Promise<History> {
+    const id = this.historyIdCounter++;
+    const newHistory: History = { ...history, id };
+    this.historyItems.set(id, newHistory);
+    return newHistory;
+  }
+  
+  async updateHistory(id: number, history: Partial<InsertHistory>): Promise<History | undefined> {
+    const existingHistory = this.historyItems.get(id);
+    if (!existingHistory) return undefined;
+    
+    const updatedHistory = { ...existingHistory, ...history };
+    this.historyItems.set(id, updatedHistory);
+    return updatedHistory;
+  }
+  
+  async deleteHistory(id: number): Promise<boolean> {
+    return this.historyItems.delete(id);
   }
   
   // Seed initial data for development
@@ -781,6 +823,63 @@ export class MemStorage implements IStorage {
     
     for (const item of mediaData) {
       await this.createMedia(item);
+    }
+    
+    // Seed club history
+    const historyData: InsertHistory[] = [
+      {
+        year: 1995,
+        title: "Основание клуба",
+        description: "ФК 'Александрия' был основан группой энтузиастов и любителей футбола. Первый состав команды был собран из местных игроков.",
+        importance: 3,
+        imageUrl: "https://images.unsplash.com/photo-1562552476-8ac59b2a2e46?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2001,
+        title: "Первый трофей",
+        description: "Клуб выиграл свой первый трофей - Кубок области. Это стало важной вехой в истории команды и началом восхождения в футбольной иерархии.",
+        importance: 2,
+        imageUrl: "https://images.unsplash.com/photo-1522778526097-ce0a22ceb253?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2008,
+        title: "Выход в высший дивизион",
+        description: "После нескольких лет упорной борьбы в низших лигах, клуб добился права выступать в высшем дивизионе страны.",
+        importance: 3,
+        imageUrl: "https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2012,
+        title: "Открытие новой тренировочной базы",
+        description: "Открытие современной тренировочной базы с несколькими полями и новым спортивным комплексом для команды.",
+        importance: 2,
+        imageUrl: "https://images.unsplash.com/photo-1518604666860-9ed391f76460?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2015,
+        title: "Первое участие в еврокубках",
+        description: "ФК 'Александрия' впервые принял участие в европейских турнирах, выступив в квалификации Лиги Европы.",
+        importance: 3,
+        imageUrl: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2019,
+        title: "Бронзовые медали чемпионата",
+        description: "Клуб завоевал бронзовые медали чемпионата, показав лучший результат в своей истории.",
+        importance: 2,
+        imageUrl: "https://images.unsplash.com/photo-1552667466-07770ae110d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+      {
+        year: 2022,
+        title: "Победа в Кубке страны",
+        description: "Историческая победа в финале Кубка страны над принципиальным соперником со счетом 2:1.",
+        importance: 3,
+        imageUrl: "https://images.unsplash.com/photo-1596778402543-47042ab4592f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&h=500&q=80",
+      },
+    ];
+    
+    for (const item of historyData) {
+      await this.createHistory(item);
     }
   }
 }

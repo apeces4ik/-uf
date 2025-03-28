@@ -84,6 +84,12 @@ const SiteHeader: React.FC = () => {
               Блог
             </a>
             <a 
+              href="/history" 
+              className={`font-roboto-condensed ${isActive('/history') ? 'text-primary font-bold' : 'hover:text-primary transition-colors'}`}
+            >
+              История
+            </a>
+            <a 
               href="/contacts" 
               className={`font-roboto-condensed ${isActive('/contacts') ? 'text-primary font-bold' : 'hover:text-primary transition-colors'}`}
             >
@@ -170,6 +176,12 @@ const SiteHeader: React.FC = () => {
             className={`block font-roboto-condensed ${isActive('/blog') ? 'text-primary font-bold' : ''}`}
           >
             Блог
+          </a>
+          <a 
+            href="/history" 
+            className={`block font-roboto-condensed ${isActive('/history') ? 'text-primary font-bold' : ''}`}
+          >
+            История
           </a>
           <a 
             href="/contacts" 

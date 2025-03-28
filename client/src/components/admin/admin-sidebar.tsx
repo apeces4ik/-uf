@@ -13,7 +13,8 @@ import {
   ListOrdered,
   MessageSquare,
   Settings,
-  LogOut
+  LogOut,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
@@ -60,6 +61,7 @@ const AdminSidebar: React.FC = () => {
     { id: 'matches', label: 'Матчи', icon: <Calendar className="h-5 w-5 mr-2" /> },
     { id: 'news', label: 'Новости', icon: <Newspaper className="h-5 w-5 mr-2" /> },
     { id: 'blog', label: 'Блог', icon: <FileText className="h-5 w-5 mr-2" /> },
+    { id: 'history', label: 'История клуба', icon: <History className="h-5 w-5 mr-2" /> },
     { id: 'media', label: 'Медиа', icon: <Image className="h-5 w-5 mr-2" /> },
     { id: 'standings', label: 'Турнирная таблица', icon: <ListOrdered className="h-5 w-5 mr-2" /> },
     { id: 'messages', label: 'Сообщения', icon: <MessageSquare className="h-5 w-5 mr-2" /> }

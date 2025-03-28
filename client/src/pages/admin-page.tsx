@@ -7,6 +7,7 @@ import PlayerForm from '@/components/admin/player-form';
 import MatchForm from '@/components/admin/match-form';
 import NewsForm from '@/components/admin/news-form';
 import BlogForm from '@/components/admin/blog-form';
+import HistoryAdmin from '@/pages/admin/history-admin';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
@@ -66,6 +67,8 @@ const AdminPage: React.FC<AdminPageProps> = () => {
         return <NewsContent />;
       case 'blog':
         return <BlogContent />;
+      case 'history':
+        return <HistoryAdmin />;
       case 'media':
         return <MediaContent />;
       case 'standings':

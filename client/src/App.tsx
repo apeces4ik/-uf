@@ -10,6 +10,7 @@ import NewsPage from "@/pages/news-page";
 import MediaPage from "@/pages/media-page";
 import BlogPage from "@/pages/blog-page";
 import ContactsPage from "@/pages/contacts-page";
+import HistoryPage from "@/pages/history-page";
 import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/media" component={MediaPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/contacts" component={ContactsPage} />
+      <Route path="/history" component={HistoryPage} />
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <ProtectedRoute path="/admin/:section" component={AdminPage} />
