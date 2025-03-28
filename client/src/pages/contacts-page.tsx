@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/apiRequest';
 import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
