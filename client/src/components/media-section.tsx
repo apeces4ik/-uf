@@ -11,12 +11,12 @@ interface MediaSectionProps {
 const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) => {
   const [activeTab, setActiveTab] = useState<string>('photos');
   const [selectedPhoto, setSelectedPhoto] = useState<Media | null>(null);
-  
+
   // Filter media by type and limit the results
   const photos = mediaItems 
     ? mediaItems.filter(item => item.type === 'photo').slice(0, limit)
     : [];
-    
+
   const videos = mediaItems 
     ? mediaItems.filter(item => item.type === 'video').slice(0, Math.floor(limit / 2))
     : [];
@@ -39,7 +39,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
           </button>
         </div>
       </div>
-      
+
       {/* Photos Grid */}
       <div id="photos-content" className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${activeTab !== 'photos' ? 'hidden' : ''}`}>
         {photos.length > 0 ? (
@@ -63,17 +63,20 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
                 </div>
               </DialogTrigger>
               <DialogContent className="max-w-3xl">
-                <div>
-                  <img 
-                    src={photo.url} 
-                    alt={photo.title || "Фото"} 
-                    className="w-full max-h-[80vh] object-contain"
-                  />
-                  {photo.title && (
-                    <div className="mt-2 text-center text-lg font-medium">{photo.title}</div>
-                  )}
-                  <div className="mt-1 text-sm text-gray-500 text-center">{photo.date}</div>
-                </div>
+                {photo && (
+                  <div className="flex flex-col items-center gap-4">
+                    <img 
+                      src={photo.url} 
+                      alt={photo.title || "Фото"} 
+                      className="w-full max-h-[80vh] object-contain"
+                    />
+                    {photo.title && (
+                      <div className="mt-2 text-center text-lg font-medium">{photo.title}</div>
+                    )}
+                    <p className="text-gray-600 text-center">{photo.description}</p>
+                    <div className="mt-1 text-sm text-gray-500 text-center">{photo.date}</div>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
           ))
@@ -83,7 +86,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
           </div>
         )}
       </div>
-      
+
       {/* Videos Grid */}
       <div id="videos-content" className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${activeTab !== 'videos' ? 'hidden' : ''}`}>
         {videos.length > 0 ? (
