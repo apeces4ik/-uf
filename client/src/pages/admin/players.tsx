@@ -125,7 +125,7 @@ export default function AdminPlayers() {
 
   const deletePlayerMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/players/${id}`);
+      await apiRequest('DELETE', `/api/players/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/players'] });
@@ -190,7 +190,7 @@ export default function AdminPlayers() {
 
   const deleteCoachMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/coaches/${id}`);
+      await apiRequest('DELETE', `/api/coaches/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/coaches'] });

@@ -549,19 +549,9 @@ export default function AdminMatches() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Турнир</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите турнир" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Чемпионат">Чемпионат</SelectItem>
-                          <SelectItem value="Кубок">Кубок</SelectItem>
-                          <SelectItem value="Суперкубок">Суперкубок</SelectItem>
-                          <SelectItem value="Товарищеский">Товарищеский</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input placeholder="Название турнира" {...field} value={field.value || ''} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -806,19 +796,9 @@ export default function AdminMatches() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Турнир</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Выберите турнир" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Чемпионат">Чемпионат</SelectItem>
-                          <SelectItem value="Кубок">Кубок</SelectItem>
-                          <SelectItem value="Суперкубок">Суперкубок</SelectItem>
-                          <SelectItem value="Товарищеский">Товарищеский</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input placeholder="Название турнира" {...field} value={field.value || ''} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

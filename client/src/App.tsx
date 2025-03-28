@@ -8,8 +8,7 @@ import TeamPage from "@/pages/team-page";
 import MatchesPage from "@/pages/matches-page";
 import NewsPage from "@/pages/news-page";
 import MediaPage from "@/pages/media-page";
-import BlogPage from "@/pages/blog-page";
-import BlogPostPage from "@/pages/blog-post-page";
+
 import ContactsPage from "@/pages/contacts-page";
 import HistoryPage from "@/pages/history-page";
 import AuthPage from "@/pages/auth-page";
@@ -35,8 +34,7 @@ function Router() {
       <Route path="/matches" component={MatchesPage} />
       <Route path="/news" component={NewsPage} />
       <Route path="/media" component={MediaPage} />
-      <Route path="/blog" component={BlogPage} />
-      <Route path="/blog/:id" component={BlogPostPage} />
+
       <Route path="/contacts" component={ContactsPage} />
       <Route path="/history" component={HistoryPage} />
       <Route path="/auth" component={AuthPage} />
