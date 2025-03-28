@@ -14,6 +14,10 @@ const BlogPostPage = () => {
   const params = useParams();
   const id = params?.id ? parseInt(params.id) : null;
 
+  // Logs for debugging
+  console.log("BlogPostPage - params:", params);
+  console.log("BlogPostPage - id:", id);
+  
   // Fetch blog post data
   const { 
     data: post, 
