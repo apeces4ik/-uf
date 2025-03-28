@@ -173,15 +173,13 @@ export default function AdminMedia() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {media.map((item) => (
             <Card key={item.id}>
-              <CardHeader>
-                <CardTitle>{item.title}</CardTitle>
-              </CardHeader>
               <CardContent>
                 {item.type === 'photo' ? (
                   <img src={item.url} alt={item.title} className="w-full h-48 object-cover mb-4" />
                 ) : (
                   <video src={item.url} controls className="w-full h-48 mb-4" />
                 )}
+                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
                 <p className="text-gray-600">{item.description}</p>
               </CardContent>
               <CardFooter>
