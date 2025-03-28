@@ -195,7 +195,14 @@ export default function AdminNews() {
 
   // Format date nicely
   const formatNewsDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMMM yyyy, HH:mm', { locale: ru });
+    try {
+      if (!dateString) return 'Дата не указана';
+      // Форматирование только даты, без времени, т.к. в данных только date без time
+      return format(new Date(dateString), 'dd MMMM yyyy', { locale: ru });
+    } catch (error) {
+      console.error('Error formatting date:', error, dateString);
+      return 'Некорректная дата';
+    }
   };
 
   // Get available categories from news items
@@ -210,7 +217,7 @@ export default function AdminNews() {
       item.content.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .filter(item => !activeCategory || item.category === activeCategory)
-    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+    .sort((a, b) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime());
 
   return (
     <AdminLayout>
@@ -307,7 +314,7 @@ export default function AdminNews() {
                   <CardFooter className="flex justify-between text-xs text-gray-500 pt-0">
                     <div className="flex items-center">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {formatNewsDate(newsItem.publishDate)}
+                      {formatNewsDate(newsItem.date)}
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="flex items-center">
@@ -405,7 +412,14 @@ export default function AdminNews() {
                   <FormItem>
                     <FormLabel>URL изображения</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        value={field.value || ''} 
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -507,7 +521,14 @@ export default function AdminNews() {
                   <FormItem>
                     <FormLabel>URL изображения</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        value={field.value || ''} 
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
