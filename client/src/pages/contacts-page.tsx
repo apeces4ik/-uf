@@ -57,9 +57,6 @@ const ContactsPage = () => {
     } finally {
       setIsSubmitting(false);
     }
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
