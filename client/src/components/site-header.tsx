@@ -44,7 +44,7 @@ const SiteHeader: React.FC = () => {
               <span className="text-primary font-roboto-condensed font-bold text-xl">ФК Александрия</span>
             </div>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
@@ -78,12 +78,6 @@ const SiteHeader: React.FC = () => {
               Медиа
             </Link>
             <Link 
-              href="/blog" 
-              className={`font-roboto-condensed ${isActive('/blog') ? 'text-primary font-bold' : 'hover:text-primary transition-colors'}`}
-            >
-              Блог
-            </Link>
-            <Link 
               href="/history" 
               className={`font-roboto-condensed ${isActive('/history') ? 'text-primary font-bold' : 'hover:text-primary transition-colors'}`}
             >
@@ -95,7 +89,7 @@ const SiteHeader: React.FC = () => {
             >
               Контакты
             </Link>
-            
+
             {/* Auth Buttons */}
             {user ? (
               <div className="flex items-center space-x-2">
@@ -123,7 +117,7 @@ const SiteHeader: React.FC = () => {
               </Link>
             )}
           </nav>
-          
+
           {/* Mobile Menu Button */}
           <button 
             className="md:hidden text-primary focus:outline-none"
@@ -137,7 +131,7 @@ const SiteHeader: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Mobile Navigation */}
       <div className={`md:hidden bg-white border-t border-gray-200 ${isMenuOpen ? 'block' : 'hidden'}`}>
         <div className="container mx-auto px-4 py-3 space-y-3">
@@ -172,12 +166,6 @@ const SiteHeader: React.FC = () => {
             Медиа
           </Link>
           <Link 
-            href="/blog" 
-            className={`block font-roboto-condensed ${isActive('/blog') ? 'text-primary font-bold' : ''}`}
-          >
-            Блог
-          </Link>
-          <Link 
             href="/history" 
             className={`block font-roboto-condensed ${isActive('/history') ? 'text-primary font-bold' : ''}`}
           >
@@ -189,7 +177,7 @@ const SiteHeader: React.FC = () => {
           >
             Контакты
           </Link>
-          
+
           {/* Mobile Auth Buttons */}
           <div className="pt-2 border-t border-gray-100">
             {user ? (
