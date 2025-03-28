@@ -6,6 +6,7 @@ import SiteFooter from '@/components/site-footer';
 import { BlogPost } from '@shared/schema';
 import { Calendar, Eye, MessageSquare } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import { Link } from 'wouter';
 
 const BlogPage = () => {
   // Fetch blog posts data
@@ -75,9 +76,9 @@ const BlogPage = () => {
                             {post.excerpt || post.content.substring(0, 150) + '...'}
                           </p>
                           <div className="flex justify-between items-center mt-auto">
-                            <a href="#" className="text-secondary-blue font-medium hover:underline">
+                            <Link href={`/blog/${post.id}`} className="text-secondary-blue font-medium hover:underline">
                               Читать полностью
-                            </a>
+                            </Link>
                             <div className="flex items-center text-sm text-gray-500">
                               <span className="flex items-center mr-3">
                                 <Eye className="mr-1 h-4 w-4" />
