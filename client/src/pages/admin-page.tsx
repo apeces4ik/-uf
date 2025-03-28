@@ -12,9 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 
-interface AdminPageProps {}
-
-const AdminPage: React.FC<AdminPageProps> = () => {
+const AdminPage = () => {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const params = useParams();
