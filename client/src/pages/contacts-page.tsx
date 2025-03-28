@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/apiRequest';
 import SiteHeader from '@/components/site-header';
 import { Input } from '@/components/ui/input';
