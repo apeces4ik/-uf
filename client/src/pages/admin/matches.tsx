@@ -83,7 +83,7 @@ export default function AdminMatches() {
   // Create match mutation
   const addMatchMutation = useMutation({
     mutationFn: async (match: InsertMatch) => {
-      const res = await apiRequest('POST', '/api/admin/matches', match);
+      const res = await apiRequest('POST', '/api/matches', match);
       return await res.json();
     },
     onSuccess: () => {
@@ -107,7 +107,7 @@ export default function AdminMatches() {
   // Update match mutation
   const updateMatchMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: Partial<InsertMatch> }) => {
-      const res = await apiRequest('PUT', `/api/admin/matches/${id}`, data);
+      const res = await apiRequest('PUT', `/api/matches/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {

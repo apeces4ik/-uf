@@ -46,12 +46,7 @@ export default function AdminMessages() {
 
   // Fetch messages
   const { data: messages, isLoading } = useQuery<ContactMessage[]>({
-    queryKey: ['/api/contact'],
-    queryFn: async () => {
-      const response = await fetch('/api/contact');
-      if (!response.ok) throw new Error('Не удалось загрузить сообщения');
-      return response.json();
-    }
+    queryKey: ['/api/contact']
   });
 
   // Mark as read mutation

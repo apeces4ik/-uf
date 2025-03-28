@@ -81,7 +81,7 @@ export default function AdminPlayers() {
   // Mutations
   const addPlayerMutation = useMutation({
     mutationFn: async (player: InsertPlayer) => {
-      const res = await apiRequest('POST', '/api/admin/players', player);
+      const res = await apiRequest('POST', '/api/players', player);
       return await res.json();
     },
     onSuccess: () => {
@@ -103,7 +103,7 @@ export default function AdminPlayers() {
 
   const updatePlayerMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: Partial<InsertPlayer> }) => {
-      const res = await apiRequest('PUT', `/api/admin/players/${id}`, data);
+      const res = await apiRequest('PUT', `/api/players/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {
@@ -146,7 +146,7 @@ export default function AdminPlayers() {
 
   const addCoachMutation = useMutation({
     mutationFn: async (coach: InsertCoach) => {
-      const res = await apiRequest('POST', '/api/admin/coaches', coach);
+      const res = await apiRequest('POST', '/api/coaches', coach);
       return await res.json();
     },
     onSuccess: () => {
@@ -168,7 +168,7 @@ export default function AdminPlayers() {
 
   const updateCoachMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: Partial<InsertCoach> }) => {
-      const res = await apiRequest('PUT', `/api/admin/coaches/${id}`, data);
+      const res = await apiRequest('PUT', `/api/coaches/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {
