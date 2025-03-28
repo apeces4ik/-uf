@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Media } from '@shared/schema';
@@ -6,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2 } from 'lucide-react';
 import {
   Card,
@@ -14,9 +16,21 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 export default function AdminMedia() {
-  const [file, setFile] = useState<File | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [type, setType] = useState<'photo' | 'video'>('photo');
+  const [url, setUrl] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,8 +43,8 @@ export default function AdminMedia() {
   });
 
   const addMediaMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const res = await apiRequest('POST', '/api/media', formData);
+    mutationFn: async (mediaData: { type: string; title: string; description: string; url: string }) => {
+      const res = await apiRequest('POST', '/api/media', mediaData);
       return res.json();
     },
     onSuccess: () => {
@@ -39,7 +53,8 @@ export default function AdminMedia() {
         title: 'Успешно',
         description: 'Медиа успешно добавлено',
       });
-      setFile(null);
+      setIsDialogOpen(false);
+      resetForm();
     },
     onError: (error: Error) => {
       toast({
@@ -70,39 +85,90 @@ export default function AdminMedia() {
     },
   });
 
-  const handleFileUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setType('photo');
+    setUrl('');
+  };
 
-    const formData = new FormData();
-    formData.append('file', file);
-    await addMediaMutation.mutateAsync(formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !url) return;
+
+    await addMediaMutation.mutateAsync({
+      type,
+      title,
+      description,
+      url,
+    });
   };
 
   return (
     <AdminLayout>
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Управление медиа</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Управление медиа</h1>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Добавить медиа
+          </Button>
+        </div>
 
-        <form onSubmit={handleFileUpload} className="mb-6">
-          <div className="flex gap-4">
-            <Input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept="image/*,video/*"
-            />
-            <Button type="submit" disabled={!file || addMediaMutation.isPending}>
-              {addMediaMutation.isPending ? (
-                <>Загрузка...</>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Добавить медиа</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <Label>Тип</Label>
+                  <select
+                    className="w-full p-2 border rounded"
+                    value={type}
+                    onChange={(e) => setType(e.target.value as 'photo' | 'video')}
+                  >
+                    <option value="photo">Фото</option>
+                    <option value="video">Видео</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Заголовок</Label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Введите заголовок"
+                  />
+                </div>
+                <div>
+                  <Label>Описание</Label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Введите описание"
+                  />
+                </div>
+                <div>
+                  <Label>URL {type === 'photo' ? 'фото' : 'видео'}</Label>
+                  <Input
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder={`Введите ссылку на ${type === 'photo' ? 'фото' : 'видео'}`}
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Отмена
+                </Button>
+                <Button type="submit" disabled={addMediaMutation.isPending}>
                   Добавить
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {media.map((item) => (
@@ -112,10 +178,11 @@ export default function AdminMedia() {
               </CardHeader>
               <CardContent>
                 {item.type === 'photo' ? (
-                  <img src={item.url} alt={item.title} className="w-full h-48 object-cover" />
+                  <img src={item.url} alt={item.title} className="w-full h-48 object-cover mb-4" />
                 ) : (
-                  <video src={item.url} controls className="w-full h-48" />
+                  <video src={item.url} controls className="w-full h-48 mb-4" />
                 )}
+                <p className="text-gray-600">{item.description}</p>
               </CardContent>
               <CardFooter>
                 <Button
