@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Media, Album, InsertMedia, InsertAlbum, insertMediaSchema, insertAlbumSchema } from '@shared/schema';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -53,7 +53,8 @@ export default function AdminMedia() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [mediaToDelete, setMediaToDelete] = useState<number | null>(null);
-  
+  const [file, setFile] = useState<File | null>(null);
+
   const { toast } = useToast();
 
   // Fetch media
@@ -90,20 +91,19 @@ export default function AdminMedia() {
     }
   });
 
-  // Create album mutation
-  const addAlbumMutation = useMutation({
-    mutationFn: async (album: InsertAlbum) => {
-      const res = await apiRequest('POST', '/api/albums', album);
-      return await res.json();
+  // Delete media mutation
+  const deleteMediaMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest('DELETE', `/api/media/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/albums'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
       toast({
         title: 'Успешно',
-        description: 'Альбом успешно создан',
+        description: 'Медиа успешно удалено',
       });
-      setIsAddAlbumOpen(false);
-      albumForm.reset();
+      setIsDeleteDialogOpen(false);
+      setMediaToDelete(null);
     },
     onError: (error: Error) => {
       toast({
@@ -137,28 +137,6 @@ export default function AdminMedia() {
     }
   });
 
-  // Delete media mutation
-  const deleteMediaMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/media/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-      toast({
-        title: 'Успешно',
-        description: 'Медиа успешно удалено',
-      });
-      setIsDeleteDialogOpen(false);
-      setMediaToDelete(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  });
 
   // Forms
   const mediaForm = useForm<InsertMedia>({
@@ -277,11 +255,47 @@ export default function AdminMedia() {
 
   const isLoading = isLoadingMedia || isLoadingAlbums;
 
+  const queryClient1 = useQueryClient();
+
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest('POST', '/api/media', formData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Успешно",
+        description: "Медиа файл успешно загружен"
+      });
+      queryClient1.invalidateQueries({ queryKey: ['/api/media'] });
+      setFile(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Ошибка",
+        description: `Не удалось загрузить файл: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', file.type.startsWith('image/') ? 'photo' : 'video');
+    formData.append('title', file.name);
+
+    uploadMutation.mutate(formData);
+  };
+
   return (
     <AdminLayout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Управление медиа</h1>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between items-center mb-6">
             <TabsList>
@@ -294,7 +308,7 @@ export default function AdminMedia() {
                 Видео
               </TabsTrigger>
             </TabsList>
-            
+
             <div className="flex space-x-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -306,11 +320,10 @@ export default function AdminMedia() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              
+
               <Button variant="outline" onClick={() => setIsAddAlbumOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Создать альбом
               </Button>
-              
               <Button onClick={() => {
                 mediaForm.reset({
                   title: '',
@@ -324,7 +337,7 @@ export default function AdminMedia() {
               </Button>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary-blue" />
@@ -374,7 +387,7 @@ export default function AdminMedia() {
                   )}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="video">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredMedia && filteredMedia.length > 0 ? (
@@ -429,7 +442,7 @@ export default function AdminMedia() {
           )}
         </Tabs>
       </div>
-      
+
       {/* Add Media Dialog */}
       <Dialog open={isAddMediaOpen} onOpenChange={setIsAddMediaOpen}>
         <DialogContent className="max-w-md">
@@ -454,7 +467,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={mediaForm.control}
                 name="type"
@@ -476,7 +489,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={mediaForm.control}
                 name="url"
@@ -493,7 +506,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={mediaForm.control}
                 name="albumId"
@@ -522,7 +535,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddMediaOpen(false)}>
                   Отмена
@@ -541,7 +554,7 @@ export default function AdminMedia() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Add Album Dialog */}
       <Dialog open={isAddAlbumOpen} onOpenChange={setIsAddAlbumOpen}>
         <DialogContent className="max-w-md">
@@ -566,7 +579,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={albumForm.control}
                 name="description"
@@ -580,7 +593,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={albumForm.control}
                 name="coverUrl"
@@ -594,7 +607,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddAlbumOpen(false)}>
                   Отмена
@@ -613,7 +626,7 @@ export default function AdminMedia() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Edit Media Dialog */}
       <Dialog open={isEditMediaOpen} onOpenChange={setIsEditMediaOpen}>
         <DialogContent className="max-w-md">
@@ -638,7 +651,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={editMediaForm.control}
                 name="type"
@@ -660,7 +673,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={editMediaForm.control}
                 name="url"
@@ -677,7 +690,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={editMediaForm.control}
                 name="albumId"
@@ -706,7 +719,7 @@ export default function AdminMedia() {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsEditMediaOpen(false)}>
                   Отмена
@@ -725,7 +738,7 @@ export default function AdminMedia() {
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Delete Media Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="max-w-md">
@@ -757,70 +770,5 @@ export default function AdminMedia() {
         </DialogContent>
       </Dialog>
     </AdminLayout>
-  );
-}
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-
-export default function AdminMedia() {
-  const [file, setFile] = useState<File | null>(null);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const uploadMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await apiRequest('POST', '/api/media', formData);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Успешно",
-        description: "Медиа файл успешно загружен"
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-      setFile(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Ошибка",
-        description: `Не удалось загрузить файл: ${error.message}`,
-        variant: "destructive"
-      });
-    }
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', file.type.startsWith('image/') ? 'photo' : 'video');
-    formData.append('title', file.name);
-    
-    uploadMutation.mutate(formData);
-  };
-
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Загрузка медиа</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="file"
-          accept="image/*,video/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="w-full p-2 border rounded"
-        />
-        <button 
-          type="submit"
-          disabled={!file || uploadMutation.isPending}
-          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          {uploadMutation.isPending ? 'Загрузка...' : 'Загрузить'}
-        </button>
-      </form>
-    </div>
   );
 }
