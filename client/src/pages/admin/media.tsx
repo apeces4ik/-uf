@@ -180,7 +180,8 @@ export default function AdminMedia() {
                   <video src={item.url} controls className="w-full h-48 mb-4" />
                 )}
                 <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+                <p className="text-gray-600 whitespace-pre-wrap mb-4">{item.description}</p>
+                <p className="text-sm text-gray-500">{new Date(item.date).toLocaleDateString('ru-RU')}</p>
               </CardContent>
               <CardFooter>
                 <Button
