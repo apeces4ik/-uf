@@ -170,6 +170,69 @@ const ContactsPage = () => {
                 </div>
                 
                 {/* Contact Form */}
+<form onSubmit={async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget);
+  
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message')
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Ошибка при отправке сообщения');
+    }
+
+    alert('Сообщение успешно отправлено!');
+    e.currentTarget.reset();
+  } catch (error) {
+    alert('Ошибка при отправке сообщения: ' + error.message);
+  }
+}}>
+  <div className="space-y-4">
+    <input 
+      type="text" 
+      name="name" 
+      required 
+      placeholder="Ваше имя" 
+      className="w-full p-2 border rounded"
+    />
+    <input 
+      type="email" 
+      name="email" 
+      required 
+      placeholder="Email" 
+      className="w-full p-2 border rounded"
+    />
+    <input 
+      type="text" 
+      name="subject" 
+      placeholder="Тема" 
+      className="w-full p-2 border rounded"
+    />
+    <textarea 
+      name="message" 
+      required 
+      placeholder="Ваше сообщение" 
+      className="w-full p-2 border rounded h-32"
+    />
+    <button 
+      type="submit" 
+      className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+    >
+      Отправить сообщение
+    </button>
+  </div>
+</form>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <h3 className="font-roboto-condensed text-xl font-bold mb-4 text-primary">Обратная связь</h3>
                   <Form {...form}>

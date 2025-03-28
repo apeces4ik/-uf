@@ -759,3 +759,68 @@ export default function AdminMedia() {
     </AdminLayout>
   );
 }
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+
+export default function AdminMedia() {
+  const [file, setFile] = useState<File | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const response = await apiRequest('POST', '/api/media', formData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Успешно",
+        description: "Медиа файл успешно загружен"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      setFile(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Ошибка",
+        description: `Не удалось загрузить файл: ${error.message}`,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', file.type.startsWith('image/') ? 'photo' : 'video');
+    formData.append('title', file.name);
+    
+    uploadMutation.mutate(formData);
+  };
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Загрузка медиа</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          className="w-full p-2 border rounded"
+        />
+        <button 
+          type="submit"
+          disabled={!file || uploadMutation.isPending}
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          {uploadMutation.isPending ? 'Загрузка...' : 'Загрузить'}
+        </button>
+      </form>
+    </div>
+  );
+}
