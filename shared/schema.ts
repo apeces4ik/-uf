@@ -142,6 +142,23 @@ export const insertMediaSchema = createInsertSchema(media).omit({
 export type InsertMedia = z.infer<typeof insertMediaSchema>;
 export type Media = typeof media.$inferSelect;
 
+// Albums for photos and videos
+export const albums = pgTable("albums", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  coverUrl: text("cover_url"),
+  date: text("date").notNull(),
+  type: text("type").notNull(), // photos, videos
+});
+
+export const insertAlbumSchema = createInsertSchema(albums).omit({
+  id: true,
+});
+
+export type InsertAlbum = z.infer<typeof insertAlbumSchema>;
+export type Album = typeof albums.$inferSelect;
+
 // Tournament standings
 export const standings = pgTable("standings", {
   id: serial("id").primaryKey(),

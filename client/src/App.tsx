@@ -18,6 +18,8 @@ import AdminCoachesPage from "@/pages/admin/coaches";
 import AdminMatchesPage from "@/pages/admin/matches";
 import AdminStandingsPage from "@/pages/admin/standings";
 import AdminMessagesPage from "@/pages/admin/messages";
+import AdminNewsPage from "@/pages/admin/news";
+import AdminMediaPage from "@/pages/admin/media";
 import HistoryAdmin from "@/pages/admin/history-admin";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AdminProtectedRoute } from "./lib/admin-protected-route";
@@ -40,6 +42,8 @@ function Router() {
       <AdminProtectedRoute path="/admin/players" component={AdminPlayersPage} />
       <AdminProtectedRoute path="/admin/coaches" component={AdminCoachesPage} />
       <AdminProtectedRoute path="/admin/matches" component={AdminMatchesPage} />
+      <AdminProtectedRoute path="/admin/news" component={AdminNewsPage} />
+      <AdminProtectedRoute path="/admin/media" component={AdminMediaPage} />
       <AdminProtectedRoute path="/admin/history" component={HistoryAdmin} />
       <AdminProtectedRoute path="/admin/standings" component={AdminStandingsPage} />
       <AdminProtectedRoute path="/admin/messages" component={AdminMessagesPage} />
