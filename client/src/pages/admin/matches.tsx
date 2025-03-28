@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Match, Team, InsertMatch, insertMatchSchema } from '@shared/schema';
+import { Match, InsertMatch, insertMatchSchema } from '@shared/schema';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
@@ -77,15 +77,8 @@ export default function AdminMatches() {
     }
   });
 
-  // Fetch teams for dropdowns
-  const { data: teams, isLoading: isLoadingTeams } = useQuery<Team[]>({
-    queryKey: ['/api/teams'],
-    queryFn: async () => {
-      const response = await fetch('/api/teams');
-      if (!response.ok) throw new Error('Не удалось загрузить команды');
-      return response.json();
-    }
-  });
+  // Больше не используем внешний список команд
+  const isLoadingTeams = false;
 
   // Create match mutation
   const addMatchMutation = useMutation({
@@ -161,28 +154,36 @@ export default function AdminMatches() {
   const matchForm = useForm<InsertMatch>({
     resolver: zodResolver(insertMatchSchema),
     defaultValues: {
-      date: new Date().toISOString(),
-      opponentId: 1,
-      isHome: true,
-      competitionType: 'Чемпионат',
-      competitionRound: 'Тур 1',
-      score: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      time: '19:00',
+      competition: 'Чемпионат',
+      homeTeam: 'Александрия',
+      awayTeam: '',
+      homeTeamLogo: '',
+      awayTeamLogo: '',
+      homeScore: undefined,
+      awayScore: undefined,
       stadium: 'Центральный',
-      status: 'upcoming'
+      status: 'upcoming',
+      round: 'Тур 1'
     }
   });
 
   const editMatchForm = useForm<InsertMatch>({
     resolver: zodResolver(insertMatchSchema),
     defaultValues: {
-      date: new Date().toISOString(),
-      opponentId: 1,
-      isHome: true,
-      competitionType: 'Чемпионат',
-      competitionRound: 'Тур 1',
-      score: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      time: '19:00',
+      competition: 'Чемпионат',
+      homeTeam: 'Александрия',
+      awayTeam: '',
+      homeTeamLogo: '',
+      awayTeamLogo: '',
+      homeScore: undefined,
+      awayScore: undefined,
       stadium: 'Центральный',
-      status: 'upcoming'
+      status: 'upcoming',
+      round: 'Тур 1'
     }
   });
 
@@ -202,13 +203,17 @@ export default function AdminMatches() {
     setSelectedMatch(match);
     editMatchForm.reset({
       date: match.date,
-      opponentId: match.opponentId,
-      isHome: match.isHome,
-      competitionType: match.competitionType,
-      competitionRound: match.competitionRound || '',
-      score: match.score || '',
+      time: match.time,
+      competition: match.competition,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      homeTeamLogo: match.homeTeamLogo || '',
+      awayTeamLogo: match.awayTeamLogo || '',
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
       stadium: match.stadium,
-      status: match.status
+      status: match.status,
+      round: match.round || ''
     });
     setIsEditMatchOpen(true);
   };
@@ -225,21 +230,16 @@ export default function AdminMatches() {
   const upcomingMatches = matches
     ?.filter(match => 
       match.status === 'upcoming' && 
-      (match.competitionType ? match.competitionType.toLowerCase().includes(searchQuery.toLowerCase()) : true)
+      (match.competition ? match.competition.toLowerCase().includes(searchQuery.toLowerCase()) : true)
     )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
   const pastMatches = matches
     ?.filter(match => 
       match.status === 'finished' && 
-      (match.competitionType ? match.competitionType.toLowerCase().includes(searchQuery.toLowerCase()) : true)
+      (match.competition ? match.competition.toLowerCase().includes(searchQuery.toLowerCase()) : true)
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  // Helper function to get team name by ID
-  const getTeamName = (id: number) => {
-    return teams?.find(team => team.id === id)?.name || 'Неизвестно';
-  };
 
   // Format date nicely
   const formatMatchDate = (dateString: string) => {
@@ -275,14 +275,18 @@ export default function AdminMatches() {
               
               <Button onClick={() => {
                 matchForm.reset({
-                  date: new Date().toISOString(),
-                  opponentId: teams?.[0]?.id || 1,
-                  isHome: true,
-                  competitionType: 'Чемпионат',
-                  competitionRound: 'Тур 1',
-                  score: '',
+                  date: format(new Date(), 'yyyy-MM-dd'),
+                  time: '19:00',
+                  competition: 'Чемпионат',
+                  homeTeam: 'Александрия',
+                  awayTeam: '',
+                  homeTeamLogo: '',
+                  awayTeamLogo: '',
+                  homeScore: undefined,
+                  awayScore: undefined,
                   stadium: 'Центральный',
-                  status: 'upcoming'
+                  status: 'upcoming',
+                  round: 'Тур 1'
                 });
                 setIsAddMatchOpen(true);
               }}>
@@ -314,11 +318,11 @@ export default function AdminMatches() {
                     {upcomingMatches && upcomingMatches.length > 0 ? (
                       upcomingMatches.map((match) => (
                         <TableRow key={match.id}>
-                          <TableCell>{formatMatchDate(match.date)}</TableCell>
-                          <TableCell>{getTeamName(match.opponentId)}</TableCell>
-                          <TableCell>{match.isHome ? 'Дома' : 'В гостях'}</TableCell>
-                          <TableCell>{match.competitionType}</TableCell>
-                          <TableCell>{match.competitionRound || '-'}</TableCell>
+                          <TableCell>{match.date} {match.time}</TableCell>
+                          <TableCell>{match.homeTeam === 'Александрия' ? match.awayTeam : match.homeTeam}</TableCell>
+                          <TableCell>{match.homeTeam === 'Александрия' ? 'Дома' : 'В гостях'}</TableCell>
+                          <TableCell>{match.competition}</TableCell>
+                          <TableCell>{match.round || '-'}</TableCell>
                           <TableCell>{match.stadium}</TableCell>
                           <TableCell className="flex justify-end space-x-2">
                             <Button
@@ -372,11 +376,11 @@ export default function AdminMatches() {
                     {pastMatches && pastMatches.length > 0 ? (
                       pastMatches.map((match) => (
                         <TableRow key={match.id}>
-                          <TableCell>{formatMatchDate(match.date)}</TableCell>
-                          <TableCell>{getTeamName(match.opponentId)}</TableCell>
-                          <TableCell>{match.isHome ? 'Дома' : 'В гостях'}</TableCell>
-                          <TableCell>{match.competitionType}</TableCell>
-                          <TableCell className="font-medium">{match.score || '-'}</TableCell>
+                          <TableCell>{match.date} {match.time}</TableCell>
+                          <TableCell>{match.homeTeam === 'Александрия' ? match.awayTeam : match.homeTeam}</TableCell>
+                          <TableCell>{match.homeTeam === 'Александрия' ? 'Дома' : 'В гостях'}</TableCell>
+                          <TableCell>{match.competition}</TableCell>
+                          <TableCell className="font-medium">{match.homeScore && match.awayScore ? `${match.homeScore}:${match.awayScore}` : '-'}</TableCell>
                           <TableCell>{match.stadium}</TableCell>
                           <TableCell className="flex justify-end space-x-2">
                             <Button
@@ -475,70 +479,77 @@ export default function AdminMatches() {
                 )}
               />
               
-              {/* Opponent field */}
-              <FormField
-                control={matchForm.control}
-                name="opponentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Соперник</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      defaultValue={field.value.toString()}
-                    >
+              {/* Teams fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={matchForm.control}
+                  name="homeTeam"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Домашняя команда</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите соперника" />
-                        </SelectTrigger>
+                        <Input placeholder="Название команды" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {teams?.filter(team => team.name !== "Александрия").map((team) => (
-                          <SelectItem key={team.id} value={team.id.toString()}>
-                            {team.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={matchForm.control}
+                  name="awayTeam"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Гостевая команда</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Название команды" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
-              {/* Home/Away field */}
-              <FormField
-                control={matchForm.control}
-                name="isHome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Место проведения</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(value === 'true')} 
-                      defaultValue={field.value.toString()}
-                    >
+              {/* Team logos */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={matchForm.control}
+                  name="homeTeamLogo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Логотип дом. команды</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите место" />
-                        </SelectTrigger>
+                        <Input placeholder="URL логотипа" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Домашний матч</SelectItem>
-                        <SelectItem value="false">Выездной матч</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={matchForm.control}
+                  name="awayTeamLogo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Логотип гост. команды</FormLabel>
+                      <FormControl>
+                        <Input placeholder="URL логотипа" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               {/* Competition fields */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={matchForm.control}
-                  name="competitionType"
+                  name="competition"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Турнир</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите турнир" />
@@ -558,12 +569,12 @@ export default function AdminMatches() {
                 
                 <FormField
                   control={matchForm.control}
-                  name="competitionRound"
+                  name="round"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Стадия/тур</FormLabel>
                       <FormControl>
-                        <Input placeholder="Например: Тур 5" {...field} />
+                        <Input placeholder="Например: Тур 5" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -609,21 +620,37 @@ export default function AdminMatches() {
                 )}
               />
               
-              {/* Score field (only for finished matches) */}
+              {/* Score fields (only for finished matches) */}
               {matchForm.watch('status') === 'finished' && (
-                <FormField
-                  control={matchForm.control}
-                  name="score"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Счет</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Например: 2:0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={matchForm.control}
+                    name="homeScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Голы хозяев</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={matchForm.control}
+                    name="awayScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Голы гостей</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
               
               <DialogFooter>
@@ -709,67 +736,77 @@ export default function AdminMatches() {
                 )}
               />
               
-              <FormField
-                control={editMatchForm.control}
-                name="opponentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Соперник</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))} 
-                      defaultValue={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите соперника" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {teams?.filter(team => team.name !== "Александрия").map((team) => (
-                          <SelectItem key={team.id} value={team.id.toString()}>
-                            {team.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={editMatchForm.control}
-                name="isHome"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Место проведения</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(value === 'true')} 
-                      defaultValue={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите место" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Домашний матч</SelectItem>
-                        <SelectItem value="false">Выездной матч</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
+              {/* Teams fields */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={editMatchForm.control}
-                  name="competitionType"
+                  name="homeTeam"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Домашняя команда</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Название команды" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editMatchForm.control}
+                  name="awayTeam"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Гостевая команда</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Название команды" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Team logos */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editMatchForm.control}
+                  name="homeTeamLogo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Логотип дом. команды</FormLabel>
+                      <FormControl>
+                        <Input placeholder="URL логотипа" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editMatchForm.control}
+                  name="awayTeamLogo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Логотип гост. команды</FormLabel>
+                      <FormControl>
+                        <Input placeholder="URL логотипа" {...field} value={field.value || ''} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {/* Competition fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editMatchForm.control}
+                  name="competition"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Турнир</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Выберите турнир" />
@@ -789,12 +826,12 @@ export default function AdminMatches() {
                 
                 <FormField
                   control={editMatchForm.control}
-                  name="competitionRound"
+                  name="round"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Стадия/тур</FormLabel>
                       <FormControl>
-                        <Input placeholder="Например: Тур 5" {...field} />
+                        <Input placeholder="Например: Тур 5" {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -838,20 +875,37 @@ export default function AdminMatches() {
                 )}
               />
               
+              {/* Score fields (only for finished matches) */}
               {editMatchForm.watch('status') === 'finished' && (
-                <FormField
-                  control={editMatchForm.control}
-                  name="score"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Счет</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Например: 2:0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={editMatchForm.control}
+                    name="homeScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Голы хозяев</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={editMatchForm.control}
+                    name="awayScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Голы гостей</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} value={field.value || ''} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
               
               <DialogFooter>
