@@ -541,13 +541,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Доступ запрещен" });
       }
       
-      const validatedData = insertMediaSchema.parse(req.body);
+      // Добавим текущую дату в случае, если она не была указана
+      const currentDate = format(new Date(), "yyyy-MM-dd");
+      const requestData = {
+        ...req.body,
+        date: req.body.date || currentDate,
+        uploadDate: req.body.uploadDate || currentDate
+      };
+      
+      const validatedData = insertMediaSchema.parse(requestData);
       const mediaItem = await storage.createMedia(validatedData);
       res.status(201).json(mediaItem);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation error:", error.errors);
         return res.status(400).json({ error: error.errors });
       }
+      console.error("Media creation error:", error);
       res.status(500).json({ error: "Ошибка при создании медиа-файла" });
     }
   });
@@ -644,6 +654,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.delete("/api/standings/:id", async (req, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Доступ запрещен" });
+      }
+      
+      const id = parseInt(req.params.id);
+      
+      // Так как нет прямого метода для удаления записи из таблицы,
+      // пометим запись как удаленную, обновив ее значения
+      const update = {
+        team: "Удалено",
+        position: 0,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+        points: 0
+      };
+      
+      const standing = await storage.updateStanding(id, update);
+      
+      if (!standing) {
+        return res.status(404).json({ error: "Запись в турнирной таблице не найдена" });
+      }
+      
+      res.status(200).json({ success: true, message: "Запись успешно удалена" });
+    } catch (error) {
+      console.error("Standings delete error:", error);
+      res.status(500).json({ error: "Ошибка при удалении записи в турнирной таблице" });
+    }
+  });
+  
   // Contact messages
   app.post("/api/contact", async (req, res) => {
     try {
@@ -653,11 +698,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const message = await storage.createContactMessage(validatedData);
-      res.status(201).json({ success: true, message: "Сообщение успешно отправлено" });
+      res.status(201).json({ success: true, message: "Сообщение успешно отправлено", data: message });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation error:", error.errors);
         return res.status(400).json({ error: error.errors });
       }
+      console.error("Contact message error:", error);
       res.status(500).json({ error: "Ошибка при отправке сообщения" });
     }
   });
