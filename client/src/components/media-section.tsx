@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Media } from '@shared/schema';
 import { Search } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface MediaSectionProps {
   mediaItems?: Media[];
@@ -10,7 +10,7 @@ interface MediaSectionProps {
 
 const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) => {
   const [activeTab, setActiveTab] = useState<string>('photos');
-  const [selectedPhoto, setSelectedPhoto] = useState<Media | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
   // Filter media by type and limit the results
   const photos = mediaItems 
@@ -44,41 +44,21 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
       <div id="photos-content" className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${activeTab !== 'photos' ? 'hidden' : ''}`}>
         {photos.length > 0 ? (
           photos.map((photo) => (
-            <Dialog key={photo.id}>
-              <DialogTrigger asChild>
-                <div 
-                  className="relative aspect-square overflow-hidden rounded-lg shadow-md group cursor-pointer"
-                  onClick={() => setSelectedPhoto(photo)}
+            <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg shadow-md group">
+              <img 
+                src={photo.url} 
+                alt={photo.title || "Фото"} 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button
+                  onClick={() => setSelectedMedia(photo)}
+                  className="p-2 bg-white rounded-full"
                 >
-                  <img 
-                    src={photo.url} 
-                    alt={photo.title || "Фото"} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="text-white">
-                      <Search className="h-8 w-8" />
-                    </div>
-                  </div>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl">
-                {photo && (
-                  <div className="flex flex-col items-center gap-4">
-                    <img 
-                      src={photo.url} 
-                      alt={photo.title || "Фото"} 
-                      className="w-full max-h-[80vh] object-contain"
-                    />
-                    {photo.title && (
-                      <div className="mt-2 text-center text-lg font-medium">{photo.title}</div>
-                    )}
-                    <p className="text-gray-600 text-center">{photo.description}</p>
-                    <div className="mt-1 text-sm text-gray-500 text-center">{photo.date}</div>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+                  <Search className="h-5 w-5 text-gray-800" />
+                </button>
+              </div>
+            </div>
           ))
         ) : (
           <div className="col-span-full text-center py-12">
@@ -86,6 +66,23 @@ const MediaSection: React.FC<MediaSectionProps> = ({ mediaItems, limit = 8 }) =>
           </div>
         )}
       </div>
+
+      <Dialog open={selectedMedia !== null} onOpenChange={setSelectedMedia}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedMedia?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <img
+              src={selectedMedia?.url}
+              alt={selectedMedia?.title}
+              className="w-full h-64 object-cover rounded-lg mb-4"
+            />
+            <p className="text-gray-600">{selectedMedia?.description}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Videos Grid */}
       <div id="videos-content" className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${activeTab !== 'videos' ? 'hidden' : ''}`}>
