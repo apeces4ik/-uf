@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -23,19 +23,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import NewsForm from '@/components/admin/news-form';
 
 export default function AdminNews() {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -51,65 +42,9 @@ export default function AdminNews() {
   const { data: news, isLoading: isLoadingNews } = useQuery<News[]>({
     queryKey: ['/api/news'],
     queryFn: async () => {
-      const response = await fetch('/api/news');
+      const response = await apiRequest('GET', '/api/news');
       if (!response.ok) throw new Error('Не удалось загрузить новости');
       return response.json();
-    }
-  });
-
-  // Create news mutation
-  const addNewsMutation = useMutation({
-    mutationFn: async (news: InsertNews) => {
-      const res = await fetch('/api/news', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(news),
-      });
-      if (!res.ok) {
-        throw new Error('Ошибка при добавлении новости');
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/news'] });
-      toast({
-        title: 'Успешно',
-        description: 'Новость успешно добавлена',
-      });
-      setIsAddNewsOpen(false);
-      newsForm.reset();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  });
-
-  // Update news mutation
-  const updateNewsMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: Partial<InsertNews> }) => {
-      const res = await apiRequest('PUT', `/api/news/${id}`, data);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/news'] });
-      toast({
-        title: 'Успешно',
-        description: 'Новость успешно обновлена',
-      });
-      setIsEditNewsOpen(false);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
     }
   });
 
@@ -136,74 +71,9 @@ export default function AdminNews() {
     }
   });
 
-  // Forms
-  const newsForm = useForm<InsertNews>({
-    resolver: zodResolver(insertNewsSchema),
-    defaultValues: {
-      title: '',
-      content: '',
-      imageUrl: '',
-      category: 'news'
-    }
-  });
-
-  const editNewsForm = useForm<InsertNews>({
-    resolver: zodResolver(insertNewsSchema),
-    defaultValues: {
-      title: '',
-      content: '',
-      imageUrl: '',
-      category: 'news'
-    }
-  });
-
-  // Form submission handlers
-  const onAddNewsSubmit = async (data: InsertNews) => {
-    try {
-      console.log('Submitting news data:', data);
-      const currentDate = new Date().toISOString();
-      const newsData = {
-        ...data,
-        publishDate: currentDate,
-        date: currentDate.split('T')[0],
-      };
-      console.log('Final news data:', newsData);
-      
-      const result = await addNewsMutation.mutateAsync(newsData);
-      console.log('News submission result:', result);
-      
-      toast({
-        title: 'Успешно',
-        description: 'Новость успешно опубликована',
-      });
-      
-      setIsAddNewsOpen(false);
-      newsForm.reset();
-    } catch (error) {
-      console.error('Error submitting news:', error);
-      toast({
-        title: 'Ошибка',
-        description: error instanceof Error ? error.message : 'Произошла ошибка при публикации новости',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const onEditNewsSubmit = (data: InsertNews) => {
-    if (selectedNews) {
-      updateNewsMutation.mutate({ id: selectedNews.id, data });
-    }
-  };
-
   // Edit news handler
   const handleEditNews = (news: News) => {
     setSelectedNews(news);
-    editNewsForm.reset({
-      title: news.title,
-      content: news.content,
-      imageUrl: news.imageUrl || '',
-      category: news.category
-    });
     setIsEditNewsOpen(true);
   };
 
@@ -236,10 +106,7 @@ export default function AdminNews() {
             />
           </div>
 
-          <Button onClick={() => {
-            newsForm.reset();
-            setIsAddNewsOpen(true);
-          }}>
+          <Button onClick={() => setIsAddNewsOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Добавить новость
           </Button>
         </div>
@@ -308,84 +175,7 @@ export default function AdminNews() {
               Заполните форму для добавления новой новости
             </DialogDescription>
           </DialogHeader>
-          <Form {...newsForm}>
-            <form onSubmit={newsForm.handleSubmit(onAddNewsSubmit)} className="space-y-4">
-              <FormField
-                control={newsForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Заголовок</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Введите заголовок новости" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={newsForm.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Содержание</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Введите текст новости" 
-                        className="min-h-[200px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={newsForm.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL изображения</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={newsForm.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Категория</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Например: новости" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddNewsOpen(false)}>
-                  Отмена
-                </Button>
-                <Button type="submit" disabled={addNewsMutation.isPending}>
-                  {addNewsMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Публикация...
-                    </>
-                  ) : (
-                    'Опубликовать'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <NewsForm onSuccess={() => setIsAddNewsOpen(false)} />
         </DialogContent>
       </Dialog>
 
@@ -398,84 +188,7 @@ export default function AdminNews() {
               Измените данные новости
             </DialogDescription>
           </DialogHeader>
-          <Form {...editNewsForm}>
-            <form onSubmit={editNewsForm.handleSubmit(onEditNewsSubmit)} className="space-y-4">
-              <FormField
-                control={editNewsForm.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Заголовок</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Введите заголовок новости" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editNewsForm.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Содержание</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Введите текст новости" 
-                        className="min-h-[200px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editNewsForm.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL изображения</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editNewsForm.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Категория</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Например: новости" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsEditNewsOpen(false)}>
-                  Отмена
-                </Button>
-                <Button type="submit" disabled={updateNewsMutation.isPending}>
-                  {updateNewsMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохранение...
-                    </>
-                  ) : (
-                    'Сохранить изменения'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <NewsForm news={selectedNews} onSuccess={() => setIsEditNewsOpen(false)} />
         </DialogContent>
       </Dialog>
 
