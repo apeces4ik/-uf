@@ -51,10 +51,11 @@ export default function NewsAdminPage() {
 
   const categories = ['Клуб', 'Матч', 'Трансфер', 'Интервью', 'Тренировка', 'Болельщикам'];
 
-  const filteredNews = (news || [])
-    .filter((item: News) =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  const filteredNews = news 
+    ? news.filter((item: News) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
     .filter((item: News) => !activeCategory || item.category === activeCategory);
 
   return (
