@@ -160,12 +160,19 @@ export default function AdminNews() {
   // Form submission handlers
   const onAddNewsSubmit = async (data: InsertNews) => {
     try {
+      const currentDate = new Date().toISOString();
       await addNewsMutation.mutateAsync({
         ...data,
-        publishDate: new Date().toISOString(),
+        publishDate: currentDate,
+        date: currentDate.split('T')[0],
       });
     } catch (error) {
       console.error('Error submitting news:', error);
+      toast({
+        title: 'Ошибка',
+        description: error instanceof Error ? error.message : 'Произошла ошибка при публикации новости',
+        variant: 'destructive',
+      });
     }
   };
 
