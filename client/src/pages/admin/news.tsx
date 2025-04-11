@@ -51,7 +51,7 @@ export default function NewsAdminPage() {
 
   const categories = ['Клуб', 'Матч', 'Трансфер', 'Интервью', 'Тренировка', 'Болельщикам'];
 
-  const filteredNews = news
+  const filteredNews = (news || [])
     .filter((item: News) =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
