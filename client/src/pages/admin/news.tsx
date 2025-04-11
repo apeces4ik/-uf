@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { News, InsertNews } from '@shared/schema';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { News } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
 import NewsForm from '@/components/admin/news-form';
@@ -23,47 +23,24 @@ export default function NewsAdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  const { data: news = [], isLoading } = useQuery({
+  const { data: news = [], isLoading, refetch } = useQuery({
     queryKey: ['/api/news'],
     queryFn: () => apiRequest('GET', '/api/news'),
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
-  });
-
-  const addNewsMutation = useMutation({
-    mutationFn: async (data: InsertNews) => {
-      return await apiRequest('POST', '/api/news', data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/news'] });
-      toast({
-        title: 'Успешно',
-        description: 'Новость успешно опубликована',
-      });
-      setIsAddNewsOpen(false);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
+    staleTime: 5000,
+    cacheTime: 10000
   });
 
   const categories = ['Клуб', 'Матч', 'Трансфер', 'Интервью', 'Тренировка', 'Болельщикам'];
 
-  const filteredNews = (Array.isArray(news) ? news : [])
-    .filter((item: News) => {
-      const titleMatch = item.title && searchQuery ? 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) : 
-        true;
-      const categoryMatch = activeCategory ? 
-        item.category === activeCategory : 
-        true;
-      return titleMatch && categoryMatch;
-    });
+  const filteredNews = Array.isArray(news) ? news.filter((item: News) => {
+    const titleMatch = item.title ? 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) : 
+      true;
+    const categoryMatch = activeCategory ? 
+      item.category === activeCategory : 
+      true;
+    return titleMatch && categoryMatch;
+  }) : [];
 
   return (
     <AdminLayout>
@@ -120,9 +97,8 @@ export default function NewsAdminPage() {
             <NewsForm
               onSuccess={() => {
                 setIsAddNewsOpen(false);
-                queryClient.invalidateQueries({ queryKey: ['/api/news'] });
+                refetch();
               }}
-              addNewsMutation={addNewsMutation} // Pass the mutation
             />
           </DialogContent>
         </Dialog>
@@ -130,7 +106,7 @@ export default function NewsAdminPage() {
         <div className="bg-white rounded-lg shadow">
           <NewsTable
             news={filteredNews}
-            onRefresh={() => queryClient.invalidateQueries({ queryKey: ['/api/news'] })}
+            onRefresh={refetch}
           />
         </div>
       </div>

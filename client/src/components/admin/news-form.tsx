@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { News, InsertNews, insertNewsSchema } from '@shared/schema';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import {
   Form,
@@ -50,22 +50,16 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
       }
       return await apiRequest('POST', '/api/news', data);
     },
-    onSuccess: (newData) => {
-      // Сначала инвалидируем кэш
+    onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['/api/news']
-      });
-      
-      // Затем принудительно обновляем данные
-      queryClient.refetchQueries({ 
-        queryKey: ['/api/news'],
-        exact: true
       });
       
       toast({
         title: 'Успешно',
         description: news?.id ? 'Новость обновлена' : 'Новость опубликована',
       });
+      
       form.reset();
       onSuccess?.();
     },
