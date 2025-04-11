@@ -27,21 +27,26 @@ const NewsPage = () => {
     ['all', ...new Set(news.map(item => item.category))] : 
     ['all'];
 
+  console.log('Raw news data:', news);
+  console.log('News type:', typeof news);
+
   // Filter news by search query and category
   const filteredNews = (Array.isArray(news) ? news : []).filter(item => {
+    if (!item) return false;
+    console.log('Processing item:', item);
     const matchesSearch = searchQuery === '' || 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    
+
     return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <SiteHeader />
-      
+
       <main className="flex-grow">
         {/* Hero Banner */}
         <section className="bg-primary text-white py-16">
@@ -52,7 +57,7 @@ const NewsPage = () => {
             </p>
           </div>
         </section>
-        
+
         {/* News Search and Filters */}
         <section className="py-8 bg-white shadow-sm">
           <div className="container mx-auto px-4">
@@ -66,7 +71,7 @@ const NewsPage = () => {
                   className="w-full"
                 />
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <Button
@@ -82,7 +87,7 @@ const NewsPage = () => {
             </div>
           </div>
         </section>
-        
+
         {/* News Content */}
         <section className="py-12">
           <div className="container mx-auto px-4">
@@ -116,13 +121,13 @@ const NewsPage = () => {
                                 {item.date}
                               </span>
                             </div>
-                            
+
                             <h2 className="font-roboto-condensed text-2xl font-bold mb-3">{item.title}</h2>
-                            
+
                             <p className="text-gray-600 mb-4">
                               {item.excerpt || item.content.substring(0, 200) + '...'}
                             </p>
-                            
+
                             <div className="flex justify-between items-center">
                               <a href="#" className="text-secondary-blue font-medium hover:underline">
                                 Читать полностью
@@ -163,7 +168,7 @@ const NewsPage = () => {
           </div>
         </section>
       </main>
-      
+
       <SiteFooter />
     </div>
   );
