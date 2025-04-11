@@ -12,7 +12,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use top news as slides or use fallback data
-  const slides = news?.slice(0, 3).map(item => ({
+  const slides = (Array.isArray(news) ? news.slice(0, 3) : []).map(item => ({
     title: item.title,
     description: item.excerpt || '',
     imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
