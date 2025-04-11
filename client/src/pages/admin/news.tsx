@@ -60,8 +60,17 @@ export default function AdminNews() {
   // Create news mutation
   const addNewsMutation = useMutation({
     mutationFn: async (news: InsertNews) => {
-      const res = await apiRequest('POST', '/api/news', news);
-      return await res.json();
+      const res = await fetch('/api/news', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(news),
+      });
+      if (!res.ok) {
+        throw new Error('Ошибка при добавлении новости');
+      }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/news'] });
@@ -149,8 +158,15 @@ export default function AdminNews() {
   });
 
   // Form submission handlers
-  const onAddNewsSubmit = (data: InsertNews) => {
-    addNewsMutation.mutate(data);
+  const onAddNewsSubmit = async (data: InsertNews) => {
+    try {
+      await addNewsMutation.mutateAsync({
+        ...data,
+        publishDate: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error submitting news:', error);
+    }
   };
 
   const onEditNewsSubmit = (data: InsertNews) => {
