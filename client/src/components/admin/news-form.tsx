@@ -53,8 +53,11 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
     onSuccess: () => {
       // Правильно инвалидируем все запросы, связанные с новостями
       queryClient.invalidateQueries({ 
-        queryKey: ['/api/news'],
-        refetchType: 'all'
+        queryKey: ['/api/news']
+      });
+      queryClient.setQueryData(['/api/news'], (oldData: any) => {
+        if (!oldData) return [data];
+        return Array.isArray(oldData) ? [...oldData, data] : [data];
       });
       toast({
         title: 'Успешно',
