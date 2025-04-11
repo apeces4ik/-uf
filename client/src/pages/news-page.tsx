@@ -28,8 +28,7 @@ const NewsPage = () => {
     ['all'];
 
   // Filter news by search query and category
-  const filteredNews = (news || []).filter(item => {
-    if (!item) return false;
+  const filteredNews = (Array.isArray(news) ? news : []).filter(item => {
     const matchesSearch = searchQuery === '' || 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()));
