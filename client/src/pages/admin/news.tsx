@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { News } from '@shared/schema';
@@ -6,20 +7,32 @@ import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
 import NewsForm from '@/components/admin/news-form';
 import { Button } from '@/components/ui/button';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import NewsTable from '@/components/admin/news-table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function NewsAdminPage() {
   const { toast } = useToast();
   const [isAddNewsOpen, setIsAddNewsOpen] = useState(false);
+  const [isEditNewsOpen, setIsEditNewsOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
+  const [newsToDelete, setNewsToDelete] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -41,6 +54,18 @@ export default function NewsAdminPage() {
       true;
     return titleMatch && categoryMatch;
   }) : [];
+
+  // Delete news handler
+  const handleDeleteNews = (id: number) => {
+    setNewsToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Edit news handler
+  const handleEditNews = (news: News) => {
+    setSelectedNews(news);
+    setIsEditNewsOpen(true);
+  };
 
   return (
     <AdminLayout>
@@ -86,6 +111,59 @@ export default function NewsAdminPage() {
           </div>
         </div>
 
+        <div className="bg-white rounded-lg shadow">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary-blue" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Дата</TableHead>
+                  <TableHead>Заголовок</TableHead>
+                  <TableHead>Категория</TableHead>
+                  <TableHead className="w-[120px] text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredNews && filteredNews.length > 0 ? (
+                  filteredNews.map((news) => (
+                    <TableRow key={news.id}>
+                      <TableCell>{news.date}</TableCell>
+                      <TableCell>{news.title}</TableCell>
+                      <TableCell>{news.category}</TableCell>
+                      <TableCell className="flex justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditNews(news)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteNews(news.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                      {searchQuery ? 'Нет новостей, соответствующих поиску' : 'Нет новостей'}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {/* Add News Dialog */}
         <Dialog open={isAddNewsOpen} onOpenChange={setIsAddNewsOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
@@ -103,12 +181,67 @@ export default function NewsAdminPage() {
           </DialogContent>
         </Dialog>
 
-        <div className="bg-white rounded-lg shadow">
-          <NewsTable
-            news={filteredNews}
-            onRefresh={refetch}
-          />
-        </div>
+        {/* Edit News Dialog */}
+        <Dialog open={isEditNewsOpen} onOpenChange={setIsEditNewsOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Редактировать новость</DialogTitle>
+              <DialogDescription>
+                Измените данные новости
+              </DialogDescription>
+            </DialogHeader>
+            <NewsForm
+              news={selectedNews}
+              onSuccess={() => {
+                setIsEditNewsOpen(false);
+                refetch();
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete News Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Подтверждение удаления</DialogTitle>
+              <DialogDescription>
+                Вы уверены, что хотите удалить эту новость? Это действие нельзя отменить.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                Отмена
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={async () => {
+                  if (newsToDelete) {
+                    try {
+                      await apiRequest('DELETE', `/api/news/${newsToDelete}`);
+                      toast({
+                        title: 'Успешно',
+                        description: 'Новость успешно удалена',
+                      });
+                      refetch();
+                    } catch (error) {
+                      toast({
+                        title: 'Ошибка',
+                        description: 'Не удалось удалить новость',
+                        variant: 'destructive',
+                      });
+                    }
+                    setIsDeleteDialogOpen(false);
+                    setNewsToDelete(null);
+                  }
+                }}
+              >
+                Удалить
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
