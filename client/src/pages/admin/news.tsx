@@ -228,7 +228,7 @@ export default function AdminNews() {
                   filteredNews.map((newsItem) => (
                     <TableRow key={newsItem.id}>
                       <TableCell>
-                        {format(new Date(newsItem.publishDate), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                        {newsItem.publishDate ? format(new Date(newsItem.publishDate), 'dd.MM.yyyy HH:mm', { locale: ru }) : '-'}
                       </TableCell>
                       <TableCell>{newsItem.title}</TableCell>
                       <TableCell>{newsItem.category}</TableCell>
