@@ -160,12 +160,25 @@ export default function AdminNews() {
   // Form submission handlers
   const onAddNewsSubmit = async (data: InsertNews) => {
     try {
+      console.log('Submitting news data:', data);
       const currentDate = new Date().toISOString();
-      await addNewsMutation.mutateAsync({
+      const newsData = {
         ...data,
         publishDate: currentDate,
         date: currentDate.split('T')[0],
+      };
+      console.log('Final news data:', newsData);
+      
+      const result = await addNewsMutation.mutateAsync(newsData);
+      console.log('News submission result:', result);
+      
+      toast({
+        title: 'Успешно',
+        description: 'Новость успешно опубликована',
       });
+      
+      setIsAddNewsOpen(false);
+      newsForm.reset();
     } catch (error) {
       console.error('Error submitting news:', error);
       toast({

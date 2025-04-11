@@ -45,12 +45,24 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertNews) => {
-      if (news?.id) {
-        return await apiRequest('PUT', `/api/news/${news.id}`, data);
+      console.log('NewsForm mutation data:', data);
+      
+      try {
+        if (news?.id) {
+          const response = await apiRequest('PUT', `/api/news/${news.id}`, data);
+          console.log('Update response:', response);
+          return response;
+        }
+        const response = await apiRequest('POST', '/api/news', data);
+        console.log('Create response:', response);
+        return response;
+      } catch (error) {
+        console.error('API request error:', error);
+        throw error;
       }
-      return await apiRequest('POST', '/api/news', data);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success:', data);
       queryClient.invalidateQueries({ 
         queryKey: ['/api/news']
       });
@@ -64,6 +76,7 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
       onSuccess?.();
     },
     onError: (error: Error) => {
+      console.error('Mutation error:', error);
       toast({
         title: 'Ошибка',
         description: error.message,
