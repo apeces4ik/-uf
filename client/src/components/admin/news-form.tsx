@@ -51,7 +51,11 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
       return await apiRequest('POST', '/api/news', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/news'] });
+      // Правильно инвалидируем все запросы, связанные с новостями
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/news'],
+        refetchType: 'all'
+      });
       toast({
         title: 'Успешно',
         description: news?.id ? 'Новость обновлена' : 'Новость опубликована',
