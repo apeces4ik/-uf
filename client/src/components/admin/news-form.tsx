@@ -1,6 +1,7 @@
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { News, InsertNews, insertNewsSchema } from '@shared/schema';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -17,16 +18,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
 
 interface NewsFormProps {
-  news?: InsertNews & { id?: number };
+  news?: News;
   onSuccess?: () => void;
 }
 
-const categories = ['Команда', 'Матчи', 'Трансферы', 'Общее'];
+const categories = ['Клуб', 'Матч', 'Трансфер', 'Интервью', 'Тренировка', 'Болельщикам'];
 
 export default function NewsForm({ news, onSuccess }: NewsFormProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const form = useForm<InsertNews>({
     resolver: zodResolver(insertNewsSchema),
@@ -35,7 +38,7 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
       content: news?.content || '',
       excerpt: news?.excerpt || '',
       imageUrl: news?.imageUrl || '',
-      category: news?.category || 'Общее',
+      category: news?.category || 'Клуб',
       date: news?.date || format(new Date(), 'yyyy-MM-dd'),
     },
   });
@@ -43,9 +46,9 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
   const mutation = useMutation({
     mutationFn: async (data: InsertNews) => {
       if (news?.id) {
-        return apiRequest('PUT', `/api/news/${news.id}`, data);
+        return await apiRequest('PUT', `/api/news/${news.id}`, data);
       }
-      return apiRequest('POST', '/api/news', data);
+      return await apiRequest('POST', '/api/news', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/news'] });
@@ -154,7 +157,14 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
         />
 
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Публикация...' : news?.id ? 'Обновить' : 'Опубликовать'}
+          {mutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {news?.id ? 'Сохранение...' : 'Публикация...'}
+            </>
+          ) : (
+            news?.id ? 'Сохранить изменения' : 'Опубликовать новость'
+          )}
         </Button>
       </form>
     </Form>
