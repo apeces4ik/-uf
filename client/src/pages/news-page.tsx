@@ -22,8 +22,8 @@ export default function NewsPage() {
   });
 
   // Get unique categories
-  const categories = news ? 
-    ['all', ...new Set(news.map(item => item.category))] : 
+  const categories = Array.isArray(news) ? 
+    ['all', ...Array.from(new Set(news.map(item => item.category)))] : 
     ['all'];
 
   // Filter news
