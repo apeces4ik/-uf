@@ -6,9 +6,9 @@ interface NewsSectionProps {
   news?: News[];
 }
 
-const NewsSection: React.FC<NewsSectionProps> = ({ news }) => {
+const NewsSection: React.FC<NewsSectionProps> = ({ news = [] }) => {
   // Check if we have news data
-  if (!news || news.length === 0) {
+  if (!Array.isArray(news) || news.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow-md">
         <p className="text-gray-500">Новости отсутствуют</p>
@@ -23,7 +23,7 @@ const NewsSection: React.FC<NewsSectionProps> = ({ news }) => {
   const secondaryNews = news.slice(1, 3);
   
   // Get the recent news for the grid
-  const recentNews = news.slice(3, 6);
+  const recentNews = news.slice(3, 6); news.slice(3, 6);
 
   return (
     <>
