@@ -55,10 +55,15 @@ export default function NewsAdminPage() {
   const categories = ['Клуб', 'Матч', 'Трансфер', 'Интервью', 'Тренировка', 'Болельщикам'];
 
   const filteredNews = (Array.isArray(news) ? news : [])
-    .filter((item: News) =>
-      item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .filter((item: News) => !activeCategory || item.category === activeCategory);
+    .filter((item: News) => {
+      const titleMatch = item.title && searchQuery ? 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) : 
+        true;
+      const categoryMatch = activeCategory ? 
+        item.category === activeCategory : 
+        true;
+      return titleMatch && categoryMatch;
+    });
 
   return (
     <AdminLayout>
