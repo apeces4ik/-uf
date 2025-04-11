@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getQueryFn } from '@/lib/queryClient';
@@ -13,35 +14,53 @@ const NewsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  // Fetch news data
   const { 
     data: news, 
-    isLoading 
+    isLoading,
+    isError 
   } = useQuery<News[]>({
     queryKey: ['/api/news'],
     queryFn: getQueryFn({ on401: 'returnNull' }),
+    staleTime: 0,
+    cacheTime: Infinity,
+    refetchOnWindowFocus: false
   });
 
   // Get all unique categories
-  const categories = Array.isArray(news) ? 
+  const categories = news ? 
     ['all', ...new Set(news.map(item => item.category))] : 
     ['all'];
 
-  console.log('Raw news data:', news);
-  console.log('News type:', typeof news);
-
   // Filter news by search query and category
-  const filteredNews = (Array.isArray(news) ? news : []).filter(item => {
-    if (!item) return false;
-    console.log('Processing item:', item);
-    const matchesSearch = searchQuery === '' || 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredNews = React.useMemo(() => {
+    if (!Array.isArray(news)) return [];
+    
+    return news.filter(item => {
+      if (!item) return false;
+      
+      const matchesSearch = searchQuery === '' || 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
+      const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    });
+  }, [news, searchQuery, categoryFilter]);
+
+  if (isError) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <SiteHeader />
+        <main className="flex-grow">
+          <div className="container mx-auto px-4 py-8">
+            <p className="text-red-500">Ошибка при загрузке новостей</p>
+          </div>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -151,7 +170,7 @@ const NewsPage = () => {
                 ) : (
                   <div className="text-center py-20">
                     <p className="text-gray-500 mb-2">Новости не найдены</p>
-                    {searchQuery || categoryFilter !== 'all' ? (
+                    {(searchQuery || categoryFilter !== 'all') && (
                       <Button 
                         onClick={() => {
                           setSearchQuery('');
@@ -160,7 +179,7 @@ const NewsPage = () => {
                       >
                         Сбросить фильтры
                       </Button>
-                    ) : null}
+                    )}
                   </div>
                 )}
               </>
