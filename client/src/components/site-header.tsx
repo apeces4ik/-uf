@@ -37,12 +37,12 @@ const SiteHeader: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="bg-primary p-2 rounded-full mr-2">
-              <div className="text-white font-oswald font-bold text-2xl">A</div>
-            </div>
-            <div>
-              <span className="text-primary font-roboto-condensed font-bold text-xl">ФК Александрия</span>
-            </div>
+            {/* Логотип вместо буквы "А" и текста */}
+            <img
+              src="https://sun9-34.userapi.com/impg/SLyyxmb6UfK4LT3hIQxHswewQdBBLuAKvAl51A/AESKxcVPQyA.jpg?size=1029x1029&quality=95&sign=17ba8496d7a4f3c5b383ec03e941a281&type=album" // Укажите путь к вашему логотипу
+              alt="Логотип ФК Александрия"
+              className="h-20 w-auto" // Настройте размеры логотипа по необходимости
+            />
           </Link>
 
           {/* Desktop Navigation */}

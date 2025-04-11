@@ -1,6 +1,5 @@
 import React from 'react';
 import { Match } from '@shared/schema';
-import { Ticket } from 'lucide-react';
 
 interface UpcomingMatchesProps {
   matches?: Match[];
@@ -55,14 +54,10 @@ const UpcomingMatches: React.FC<UpcomingMatchesProps> = ({ matches }) => {
               </div>
             </div>
             
-            <div className="mt-6 flex justify-between">
-              <div className="text-center bg-white px-3 py-2 rounded-md shadow-sm flex-1 mr-2">
-                <div className="text-sm text-gray-500">Стадион</div>
-                <div className="font-medium">{match.stadium}</div>
-              </div>
-              <a href="#" className="bg-primary hover:bg-secondary-blue text-white text-center px-3 py-2 rounded-md shadow-sm transition-colors flex-1 ml-2">
-                <Ticket className="inline-block mr-2 h-4 w-4" /> Билеты
-              </a>
+            {/* Updated Stadium Information Section */}
+            <div className="mt-6 bg-white px-4 py-3 rounded-md shadow-sm text-center">
+              <div className="text-sm text-gray-500">Стадион</div>
+              <div className="font-medium text-lg">{match.stadium}</div>
             </div>
           </div>
         </div>

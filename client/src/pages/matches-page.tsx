@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getQueryFn } from '@/lib/queryClient';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Match, Standing } from '@shared/schema';
-import { Calendar, Clock, MapPin, Ticket } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 const MatchesPage = () => {
@@ -106,14 +106,20 @@ const MatchesPage = () => {
                               </div>
                             </div>
                             
-                            <div className="mt-6 flex justify-between">
-                              <div className="text-center bg-white px-3 py-2 rounded-md shadow-sm flex-1 mr-2">
-                                <div className="text-sm text-gray-500">Стадион</div>
-                                <div className="font-medium">{match.stadium}</div>
+                            <div className="mt-6">
+                              <div className="bg-gray-50 p-4 rounded-md">
+                                <div className="flex items-center justify-center mb-2">
+                                  <MapPin className="h-5 w-5 mr-2 text-primary" />
+                                  <span className="font-medium">{match.stadium}</span>
+                                </div>
+                                <div className="flex items-center justify-center text-sm text-gray-600">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  <span>{match.date}</span>
+                                  <span className="mx-2">•</span>
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  <span>{match.time}</span>
+                                </div>
                               </div>
-                              <a href="#" className="bg-primary hover:bg-secondary-blue text-white text-center px-3 py-2 rounded-md shadow-sm transition-colors flex-1 ml-2">
-                                <Ticket className="inline-block mr-2 h-4 w-4" /> Билеты
-                              </a>
                             </div>
                           </div>
                         </div>
@@ -173,10 +179,16 @@ const MatchesPage = () => {
                               </div>
                             </div>
                             
-                            <div className="mt-4 text-center p-2 bg-gray-50 rounded-md">
-                              <div className="text-sm">
-                                <MapPin className="inline-block mr-1 h-4 w-4" />
-                                <span className="text-gray-500">Стадион:</span> {match.stadium}
+                            <div className="mt-6">
+                              <div className="bg-gray-50 p-4 rounded-md">
+                                <div className="flex items-center justify-center mb-2">
+                                  <MapPin className="h-5 w-5 mr-2 text-primary" />
+                                  <span className="font-medium">{match.stadium}</span>
+                                </div>
+                                <div className="flex items-center justify-center text-sm text-gray-600">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  <span>{match.date}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
