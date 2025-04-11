@@ -23,7 +23,7 @@ const NewsPage = () => {
   });
 
   // Get all unique categories
-  const categories = news ? 
+  const categories = Array.isArray(news) ? 
     ['all', ...new Set(news.map(item => item.category))] : 
     ['all'];
 
