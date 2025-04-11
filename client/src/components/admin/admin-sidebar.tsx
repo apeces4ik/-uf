@@ -59,7 +59,6 @@ const AdminSidebar: React.FC = () => {
     { id: 'players', label: 'Игроки', icon: <Users className="h-5 w-5 mr-2" /> },
     { id: 'coaches', label: 'Тренерский штаб', icon: <Users className="h-5 w-5 mr-2" /> },
     { id: 'matches', label: 'Матчи', icon: <Calendar className="h-5 w-5 mr-2" /> },
-    { id: 'news', label: 'Новости', icon: <Newspaper className="h-5 w-5 mr-2" /> },
     { id: 'blog', label: 'Блог', icon: <FileText className="h-5 w-5 mr-2" /> },
     { id: 'history', label: 'История клуба', icon: <History className="h-5 w-5 mr-2" /> },
     { id: 'media', label: 'Медиа', icon: <Image className="h-5 w-5 mr-2" /> },
