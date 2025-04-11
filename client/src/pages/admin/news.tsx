@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { News, InsertNews, insertNewsSchema } from '@shared/schema';
@@ -7,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -25,13 +24,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Form,
   FormControl,
   FormField,
@@ -45,14 +37,14 @@ import { Loader2, Plus, Edit, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
-export default function NewsAdminPage() {
+export default function AdminNews() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isAddNewsOpen, setIsAddNewsOpen] = useState(false);
   const [isEditNewsOpen, setIsEditNewsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [newsToDelete, setNewsToDelete] = useState<number | null>(null);
-  
+
   const { toast } = useToast();
 
   // Fetch news
@@ -141,10 +133,8 @@ export default function NewsAdminPage() {
     defaultValues: {
       title: '',
       content: '',
-      excerpt: '',
       imageUrl: '',
-      category: 'Клуб',
-      date: format(new Date(), 'yyyy-MM-dd'),
+      category: 'news'
     }
   });
 
@@ -153,10 +143,8 @@ export default function NewsAdminPage() {
     defaultValues: {
       title: '',
       content: '',
-      excerpt: '',
       imageUrl: '',
-      category: 'Клуб',
-      date: format(new Date(), 'yyyy-MM-dd'),
+      category: 'news'
     }
   });
 
@@ -171,22 +159,14 @@ export default function NewsAdminPage() {
     }
   };
 
-  // Filter news
-  const filteredNews = news?.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   // Edit news handler
   const handleEditNews = (news: News) => {
     setSelectedNews(news);
     editNewsForm.reset({
       title: news.title,
       content: news.content,
-      excerpt: news.excerpt,
-      imageUrl: news.imageUrl,
-      category: news.category,
-      date: news.date
+      imageUrl: news.imageUrl || '',
+      category: news.category
     });
     setIsEditNewsOpen(true);
   };
@@ -197,23 +177,29 @@ export default function NewsAdminPage() {
     setIsDeleteDialogOpen(true);
   };
 
+  // Filter news based on search query
+  const filteredNews = news?.filter(item =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.content.toLowerCase().includes(searchQuery.toLowerCase())
+  ).sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
+
   return (
     <AdminLayout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Управление новостями</h1>
-        
+
         <div className="flex justify-between items-center mb-6">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
               type="search"
-              placeholder="Поиск..."
+              placeholder="Поиск по заголовку..."
               className="pl-8 w-[250px]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
+
           <Button onClick={() => {
             newsForm.reset();
             setIsAddNewsOpen(true);
@@ -221,7 +207,7 @@ export default function NewsAdminPage() {
             <Plus className="mr-2 h-4 w-4" /> Добавить новость
           </Button>
         </div>
-        
+
         <div className="bg-white rounded-md border shadow-sm">
           {isLoadingNews ? (
             <div className="flex justify-center py-8">
@@ -231,7 +217,7 @@ export default function NewsAdminPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Дата</TableHead>
+                  <TableHead>Дата публикации</TableHead>
                   <TableHead>Заголовок</TableHead>
                   <TableHead>Категория</TableHead>
                   <TableHead className="w-[120px] text-right">Действия</TableHead>
@@ -239,23 +225,25 @@ export default function NewsAdminPage() {
               </TableHeader>
               <TableBody>
                 {filteredNews && filteredNews.length > 0 ? (
-                  filteredNews.map((news) => (
-                    <TableRow key={news.id}>
-                      <TableCell>{format(new Date(news.date), 'dd.MM.yyyy')}</TableCell>
-                      <TableCell>{news.title}</TableCell>
-                      <TableCell>{news.category}</TableCell>
+                  filteredNews.map((newsItem) => (
+                    <TableRow key={newsItem.id}>
+                      <TableCell>
+                        {format(new Date(newsItem.publishDate), 'dd.MM.yyyy HH:mm', { locale: ru })}
+                      </TableCell>
+                      <TableCell>{newsItem.title}</TableCell>
+                      <TableCell>{newsItem.category}</TableCell>
                       <TableCell className="flex justify-end space-x-2">
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleEditNews(news)}
+                          onClick={() => handleEditNews(newsItem)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDeleteNews(news.id)}
+                          onClick={() => handleDeleteNews(newsItem.id)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
@@ -277,7 +265,7 @@ export default function NewsAdminPage() {
 
       {/* Add News Dialog */}
       <Dialog open={isAddNewsOpen} onOpenChange={setIsAddNewsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Добавить новость</DialogTitle>
             <DialogDescription>
@@ -293,7 +281,7 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>Заголовок</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Введите заголовок новости" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -307,21 +295,11 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>Содержание</FormLabel>
                     <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={newsForm.control}
-                name="excerpt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Краткое описание</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
+                      <Textarea 
+                        placeholder="Введите текст новости" 
+                        className="min-h-[200px]"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -335,7 +313,7 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>URL изображения</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="https://example.com/image.jpg" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -348,34 +326,8 @@ export default function NewsAdminPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Категория</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите категорию" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Клуб">Клуб</SelectItem>
-                        <SelectItem value="Матч">Матч</SelectItem>
-                        <SelectItem value="Трансфер">Трансфер</SelectItem>
-                        <SelectItem value="Интервью">Интервью</SelectItem>
-                        <SelectItem value="Тренировка">Тренировка</SelectItem>
-                        <SelectItem value="Болельщикам">Болельщикам</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={newsForm.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Дата публикации</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input placeholder="Например: новости" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -389,10 +341,10 @@ export default function NewsAdminPage() {
                 <Button type="submit" disabled={addNewsMutation.isPending}>
                   {addNewsMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохранение...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Публикация...
                     </>
                   ) : (
-                    'Добавить новость'
+                    'Опубликовать'
                   )}
                 </Button>
               </DialogFooter>
@@ -403,7 +355,7 @@ export default function NewsAdminPage() {
 
       {/* Edit News Dialog */}
       <Dialog open={isEditNewsOpen} onOpenChange={setIsEditNewsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Редактировать новость</DialogTitle>
             <DialogDescription>
@@ -419,7 +371,7 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>Заголовок</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="Введите заголовок новости" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -433,21 +385,11 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>Содержание</FormLabel>
                     <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editNewsForm.control}
-                name="excerpt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Краткое описание</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
+                      <Textarea 
+                        placeholder="Введите текст новости" 
+                        className="min-h-[200px]"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -461,7 +403,7 @@ export default function NewsAdminPage() {
                   <FormItem>
                     <FormLabel>URL изображения</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="https://example.com/image.jpg" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -474,34 +416,8 @@ export default function NewsAdminPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Категория</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите категорию" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Клуб">Клуб</SelectItem>
-                        <SelectItem value="Матч">Матч</SelectItem>
-                        <SelectItem value="Трансфер">Трансфер</SelectItem>
-                        <SelectItem value="Интервью">Интервью</SelectItem>
-                        <SelectItem value="Тренировка">Тренировка</SelectItem>
-                        <SelectItem value="Болельщикам">Болельщикам</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editNewsForm.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Дата публикации</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input placeholder="Например: новости" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
