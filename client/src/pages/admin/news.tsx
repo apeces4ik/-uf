@@ -26,10 +26,9 @@ export default function NewsAdminPage() {
   const { data: news = [], isLoading } = useQuery({
     queryKey: ['/api/news'],
     queryFn: () => apiRequest('GET', '/api/news'),
-    staleTime: Infinity,
-    cacheTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   const addNewsMutation = useMutation({
