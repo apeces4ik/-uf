@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useParams } from 'wouter';
 import AdminLayout from '@/components/admin/admin-layout';
 import { useAuth } from '@/hooks/use-auth';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import PlayerForm from '@/components/admin/player-form';
 import MatchForm from '@/components/admin/match-form';
 import NewsForm from '@/components/admin/news-form';
@@ -13,10 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Pencil, Trash } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2, Pencil, Trash2, Plus, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import { Input } from '@/components/ui/input';
 
 const AdminPage = () => {
   const { user } = useAuth();
@@ -392,6 +392,38 @@ const CoachesContent = () => {
     queryKey: ['/api/coaches'],
   });
 
+  const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { toast } = useToast();
+
+  const deleteCoachMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/coaches/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete coach');
+    },
+    onSuccess: () => {
+      refetch();
+      setIsDeleteOpen(false);
+      toast({
+        title: "Успешно",
+        description: "Тренер был удален",
+      });
+    },
+  });
+
+  const handleEdit = (coach: Coach) => {
+    setSelectedCoach(coach);
+    setIsEditOpen(true);
+  };
+
+  const handleDelete = (coach: Coach) => {
+    setSelectedCoach(coach);
+    setIsDeleteOpen(true);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление тренерским штабом</h1>
@@ -429,6 +461,24 @@ const CoachesContent = () => {
                         <div><span className="text-gray-500">Достижения:</span> {coach.achievements}</div>
                       )}
                     </div>
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(coach)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Изменить
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(coach)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Удалить
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -437,9 +487,52 @@ const CoachesContent = () => {
         </TabsContent>
         
         <TabsContent value="add">
-          {/* Coach Form - Similar structure to PlayerForm */}
+          <CoachForm onSuccess={() => refetch()} />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать тренера</DialogTitle>
+          </DialogHeader>
+          {selectedCoach && (
+            <CoachForm 
+              coach={selectedCoach} 
+              onSuccess={() => {
+                refetch();
+                setIsEditOpen(false);
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить тренера</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить этого тренера? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedCoach && deleteCoachMutation.mutate(selectedCoach.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteCoachMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Удалить"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
