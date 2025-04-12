@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Pencil, Trash2, Plus, Search } from 'lucide-react';
+import { Loader2, Pencil, Trash2 as Trash, Plus, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { Input } from '@/components/ui/input';
@@ -115,7 +115,7 @@ const DashboardContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Панель управления</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
           <CardHeader className="pb-2">
@@ -126,7 +126,7 @@ const DashboardContent = () => {
             <p className="text-4xl font-bold">{players?.length || 0}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl">Матчи</CardTitle>
@@ -136,7 +136,7 @@ const DashboardContent = () => {
             <p className="text-4xl font-bold">{matches?.length || 0}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl">Новости</CardTitle>
@@ -146,7 +146,7 @@ const DashboardContent = () => {
             <p className="text-4xl font-bold">{news?.length || 0}</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-2xl">Сообщения</CardTitle>
@@ -157,7 +157,7 @@ const DashboardContent = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -183,7 +183,7 @@ const DashboardContent = () => {
             )}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Предстоящие матчи</CardTitle>
@@ -258,13 +258,13 @@ const PlayersContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление игроками</h1>
-      
+
       <Tabs defaultValue="list">
         <TabsList className="mb-6">
           <TabsTrigger value="list">Список игроков</TabsTrigger>
           <TabsTrigger value="add">Добавить игрока</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -335,7 +335,7 @@ const PlayersContent = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="add">
           <PlayerForm onSuccess={() => refetch()} />
         </TabsContent>
@@ -428,13 +428,13 @@ const CoachesContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление тренерским штабом</h1>
-      
+
       <Tabs defaultValue="list">
         <TabsList className="mb-6">
           <TabsTrigger value="list">Список тренеров</TabsTrigger>
           <TabsTrigger value="add">Добавить тренера</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -486,7 +486,7 @@ const CoachesContent = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="add">
           <CoachForm onSuccess={() => refetch()} />
         </TabsContent>
@@ -579,13 +579,13 @@ const MatchesContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление матчами</h1>
-      
+
       <Tabs defaultValue="list">
         <TabsList className="mb-6">
           <TabsTrigger value="list">Список матчей</TabsTrigger>
           <TabsTrigger value="add">Добавить матч</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -605,12 +605,12 @@ const MatchesContent = () => {
                          match.status === 'completed' ? 'Завершен' : 'Отменен'}
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-between items-center mt-4">
                       <div className="text-center w-5/12">
                         <div className="font-bold text-lg">{match.homeTeam}</div>
                       </div>
-                      
+
                       <div className="text-center w-2/12">
                         {match.status === 'completed' ? (
                           <div className="text-2xl font-bold">
@@ -623,12 +623,12 @@ const MatchesContent = () => {
                           {match.round || 'Матч'}
                         </div>
                       </div>
-                      
+
                       <div className="text-center w-5/12">
                         <div className="font-bold text-lg">{match.awayTeam}</div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between">
                       <div className="text-sm">
                         <span className="text-gray-500">Стадион:</span> {match.stadium}
@@ -658,7 +658,7 @@ const MatchesContent = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="add">
           <MatchForm onSuccess={() => refetch()} />
         </TabsContent>
@@ -751,13 +751,13 @@ const NewsContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление новостями</h1>
-      
+
       <Tabs defaultValue="list">
         <TabsList className="mb-6">
           <TabsTrigger value="list">Список новостей</TabsTrigger>
           <TabsTrigger value="add">Добавить новость</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -817,7 +817,7 @@ const NewsContent = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="add">
           <NewsForm onSuccess={() => refetch()} />
         </TabsContent>
@@ -878,13 +878,13 @@ const BlogContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление блогом</h1>
-      
+
       <Tabs defaultValue="list">
         <TabsList className="mb-6">
           <TabsTrigger value="list">Список статей</TabsTrigger>
           <TabsTrigger value="add">Добавить статью</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
           {isLoading ? (
             <div className="flex justify-center py-10">
@@ -904,7 +904,7 @@ const BlogContent = () => {
                         />
                       </div>
                     )}
-                    <CardContent className={`p-4 ${post.imageUrl ? 'md:w-3/4' : 'w-full'}`}>
+                    <CardContent className={`p-4 ${post.imageUrl ?` 'md:w-3/4' : 'w-full'}`}>
                       <div className="flex items-center mb-3">
                         {post.authorAvatar && (
                           <img 
@@ -932,7 +932,7 @@ const BlogContent = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="add">
           <BlogForm onSuccess={() => refetch()} />
         </TabsContent>
