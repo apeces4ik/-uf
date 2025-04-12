@@ -25,6 +25,8 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { AdminProtectedRoute } from "./lib/admin-protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 import "@/lib/fonts";
+import NewsDetailPage from "@/pages/news-detail-page"; //Import the new component
+
 
 function Router() {
   return (
@@ -33,6 +35,7 @@ function Router() {
       <Route path="/team" component={TeamPage} />
       <Route path="/matches" component={MatchesPage} />
       <Route path="/news" component={NewsPage} />
+      <Route path="/news/:id" component={NewsDetailPage} /> {/* Added route for news details */}
       <Route path="/media" component={MediaPage} />
       <Route path="/contacts" component={ContactsPage} />
       <Route path="/history" component={HistoryPage} />

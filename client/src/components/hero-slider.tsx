@@ -24,7 +24,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
       title: 'Важная победа в чемпионате',
       description: 'ФК "Александрия" обыграла соперника со счетом 2:0',
       imageUrl: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
-      link: '#',
+      link: `/news/1`, // Added ID for fallback news item
       linkText: 'Подробнее',
       category: 'Матч'
     },
@@ -32,7 +32,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
       title: 'Полуфинал кубка страны',
       description: '15 мая состоится важнейший матч сезона',
       imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
-      link: '#',
+      link: `/news/2`, // Added ID for fallback news item
       linkText: 'Купить билеты',
       category: 'Анонс'
     },
@@ -40,7 +40,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
       title: 'Новое пополнение команды',
       description: 'Встречайте нового нападающего Александра Петрова',
       imageUrl: 'https://images.unsplash.com/photo-1459865264687-595d652de67e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80',
-      link: '#',
+      link: `/news/3`, // Added ID for fallback news item
       linkText: 'Об игроке',
       category: 'Трансфер'
     }
@@ -123,7 +123,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
             </div>
           </div>
         ))}
-        
+
         {/* Slider Controls */}
         <div className="absolute inset-y-0 left-4 flex items-center z-30">
           <button 
@@ -141,7 +141,7 @@ const HeroSlider: React.FC<HeroSliderProps> = ({ news }) => {
             <ChevronRight className="h-6 w-6" />
           </button>
         </div>
-        
+
         {/* Indicators */}
         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-30">
           {slides.map((_, index) => (
