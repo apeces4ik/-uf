@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { News } from '@shared/schema';
 import { Button } from '@/components/ui/button';
@@ -45,9 +46,7 @@ export default function NewsSection() {
           </div>
         ) : (
           <>
-            {/* Featured News */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Main News */}
               {featuredNews && (
                 <div className="lg:col-span-2 bg-gray-50 rounded-lg overflow-hidden shadow-md">
                   <div className="relative h-80">
@@ -63,9 +62,7 @@ export default function NewsSection() {
                       </div>
                       <h3 className="font-roboto-condensed text-2xl font-bold mb-2">{featuredNews.title}</h3>
                       <div className="flex items-center text-sm">
-                        <span className="mr-4">
-                          <Calendar className="inline-block mr-1 h-4 w-4" /> {formatDate(featuredNews.publishDate)}
-                        </span>
+                        <Calendar className="inline-block mr-1 h-4 w-4" /> {formatDate(featuredNews.publishDate)}
                       </div>
                       <Link to={`/news/${featuredNews.id}`} className="mt-4 inline-block text-white hover:underline">
                         Подробнее
@@ -75,7 +72,6 @@ export default function NewsSection() {
                 </div>
               )}
 
-              {/* Secondary News */}
               <div className="flex flex-col gap-6">
                 {secondaryNews.map(newsItem => (
                   <div key={newsItem.id} className="bg-gray-50 rounded-lg overflow-hidden shadow-md">
@@ -101,7 +97,6 @@ export default function NewsSection() {
               </div>
             </div>
 
-            {/* News Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {regularNews.map(newsItem => (
                 <Card key={newsItem.id} className="bg-gray-50 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
@@ -114,9 +109,7 @@ export default function NewsSection() {
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-center text-sm text-gray-500 mb-2">
-                      <span className="mr-4">
-                        <Calendar className="inline-block mr-1 h-4 w-4" /> {formatDate(newsItem.publishDate)}
-                      </span>
+                      <Calendar className="inline-block mr-1 h-4 w-4" /> {formatDate(newsItem.publishDate)}
                     </div>
                     <h3 className="font-roboto-condensed text-lg font-bold mb-2">{newsItem.title}</h3>
                     <p className="text-gray-600 text-sm mb-3">
