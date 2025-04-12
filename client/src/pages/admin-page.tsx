@@ -544,6 +544,38 @@ const MatchesContent = () => {
     queryKey: ['/api/matches'],
   });
 
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { toast } = useToast();
+
+  const deleteMatchMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/matches/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete match');
+    },
+    onSuccess: () => {
+      refetch();
+      setIsDeleteOpen(false);
+      toast({
+        title: "Успешно",
+        description: "Матч был удален",
+      });
+    },
+  });
+
+  const handleEdit = (match: Match) => {
+    setSelectedMatch(match);
+    setIsEditOpen(true);
+  };
+
+  const handleDelete = (match: Match) => {
+    setSelectedMatch(match);
+    setIsDeleteOpen(true);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление матчами</h1>
@@ -601,6 +633,24 @@ const MatchesContent = () => {
                       <div className="text-sm">
                         <span className="text-gray-500">Стадион:</span> {match.stadium}
                       </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(match)}
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Изменить
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(match)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Удалить
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -613,6 +663,49 @@ const MatchesContent = () => {
           <MatchForm onSuccess={() => refetch()} />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать матч</DialogTitle>
+          </DialogHeader>
+          {selectedMatch && (
+            <MatchForm 
+              match={selectedMatch} 
+              onSuccess={() => {
+                refetch();
+                setIsEditOpen(false);
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить матч</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить этот матч? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedMatch && deleteMatchMutation.mutate(selectedMatch.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMatchMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Удалить"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
@@ -622,6 +715,38 @@ const NewsContent = () => {
   const { data: news, isLoading, refetch } = useQuery({
     queryKey: ['/api/news'],
   });
+
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { toast } = useToast();
+
+  const deleteNewsMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/news/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete news');
+    },
+    onSuccess: () => {
+      refetch();
+      setIsDeleteOpen(false);
+      toast({
+        title: "Успешно",
+        description: "Новость была удалена",
+      });
+    },
+  });
+
+  const handleEdit = (item: News) => {
+    setSelectedNews(item);
+    setIsEditOpen(true);
+  };
+
+  const handleDelete = (item: News) => {
+    setSelectedNews(item);
+    setIsDeleteOpen(true);
+  };
 
   return (
     <div>
@@ -666,6 +791,24 @@ const NewsContent = () => {
                           <span className="mr-4"><i className="far fa-eye mr-1"></i> {item.views}</span>
                           <span><i className="far fa-comment mr-1"></i> {item.comments}</span>
                         </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Изменить
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(item)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Удалить
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </div>
@@ -679,6 +822,49 @@ const NewsContent = () => {
           <NewsForm onSuccess={() => refetch()} />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать новость</DialogTitle>
+          </DialogHeader>
+          {selectedNews && (
+            <NewsForm 
+              news={selectedNews} 
+              onSuccess={() => {
+                refetch();
+                setIsEditOpen(false);
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить новость</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить эту новость? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedNews && deleteNewsMutation.mutate(selectedNews.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteNewsMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Удалить"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
