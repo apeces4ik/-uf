@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Player, InsertPlayer, insertPlayerSchema } from '@shared/schema';
+import { Player, InsertPlayer } from '@shared/schema';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import AdminLayout from './layout';
@@ -9,10 +9,9 @@ import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   Table,
@@ -22,17 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Plus, Edit, Trash2, Search } from 'lucide-react';
+import PlayerForm from '@/components/admin/player-form';
 
 export default function AdminPlayers() {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -51,53 +41,6 @@ export default function AdminPlayers() {
       const response = await apiRequest('GET', '/api/players');
       if (!response.ok) throw new Error('Не удалось загрузить игроков');
       return response.json();
-    }
-  });
-
-  // Add player mutation
-  const addPlayerMutation = useMutation({
-    mutationFn: async (player: InsertPlayer) => {
-      const res = await apiRequest('POST', '/api/players', player);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
-      toast({
-        title: 'Успешно',
-        description: 'Игрок успешно добавлен',
-      });
-      setIsAddPlayerOpen(false);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  });
-
-  // Update player mutation
-  const updatePlayerMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: Partial<InsertPlayer> }) => {
-      const res = await apiRequest('PUT', `/api/players/${id}`, data);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/players'] });
-      toast({
-        title: 'Успешно',
-        description: 'Игрок успешно обновлен',
-      });
-      setIsEditPlayerOpen(false);
-      setSelectedPlayer(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Ошибка',
-        description: error.message,
-        variant: 'destructive',
-      });
     }
   });
 
@@ -124,47 +67,9 @@ export default function AdminPlayers() {
     }
   });
 
-  // Form setup
-  const playerForm = useForm<InsertPlayer>({
-    resolver: zodResolver(insertPlayerSchema),
-    defaultValues: {
-      name: '',
-      number: 1,
-      position: 'goalkeeper',
-      age: 18,
-      matches: 0,
-      goals: 0,
-      assists: 0,
-      cleanSheets: 0,
-      photoUrl: ''
-    }
-  });
-
-  // Form submissions
-  const onAddPlayerSubmit = (data: InsertPlayer) => {
-    addPlayerMutation.mutate(data);
-  };
-
-  const onEditPlayerSubmit = (data: InsertPlayer) => {
-    if (selectedPlayer) {
-      updatePlayerMutation.mutate({ id: selectedPlayer.id, data });
-    }
-  };
-
   // Edit handler
   const handleEditPlayer = (player: Player) => {
     setSelectedPlayer(player);
-    playerForm.reset({
-      name: player.name,
-      number: player.number,
-      position: player.position,
-      age: player.age,
-      matches: player.matches,
-      goals: player.goals,
-      assists: player.assists,
-      cleanSheets: player.cleanSheets,
-      photoUrl: player.photoUrl || ''
-    });
     setIsEditPlayerOpen(true);
   };
 
@@ -205,7 +110,7 @@ export default function AdminPlayers() {
         <div className="bg-white rounded-md border shadow-sm">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-blue" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <Table>
@@ -265,341 +170,36 @@ export default function AdminPlayers() {
 
       {/* Add Player Dialog */}
       <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Добавить игрока</DialogTitle>
-            <DialogDescription>
-              Заполните форму для добавления нового игрока
-            </DialogDescription>
           </DialogHeader>
-          <Form {...playerForm}>
-            <form onSubmit={playerForm.handleSubmit(onAddPlayerSubmit)} className="space-y-4">
-              {/* Form fields */}
-              <FormField
-                control={playerForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Имя игрока</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Иван Петров" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Номер</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="age"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Возраст</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="position"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Позиция</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите позицию" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="goalkeeper">Вратарь</SelectItem>
-                        <SelectItem value="defender">Защитник</SelectItem>
-                        <SelectItem value="midfielder">Полузащитник</SelectItem>
-                        <SelectItem value="forward">Нападающий</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="matches"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Матчи</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="goals"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Голы</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="assists"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Передачи</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {playerForm.watch('position') === 'goalkeeper' && (
-                <FormField
-                  control={playerForm.control}
-                  name="cleanSheets"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Сухие матчи</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              <FormField
-                control={playerForm.control}
-                name="photoUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL фотографии</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/photo.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddPlayerOpen(false)}>
-                  Отмена
-                </Button>
-                <Button type="submit" disabled={addPlayerMutation.isPending}>
-                  {addPlayerMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохранение...
-                    </>
-                  ) : (
-                    'Добавить игрока'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <PlayerForm onSuccess={() => setIsAddPlayerOpen(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Edit Player Dialog */}
       <Dialog open={isEditPlayerOpen} onOpenChange={setIsEditPlayerOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Редактировать игрока</DialogTitle>
-            <DialogDescription>
-              Измените данные игрока
-            </DialogDescription>
           </DialogHeader>
-          <Form {...playerForm}>
-            <form onSubmit={playerForm.handleSubmit(onEditPlayerSubmit)} className="space-y-4">
-              {/* Same form fields as Add Player */}
-              <FormField
-                control={playerForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Имя игрока</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Иван Петров" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Номер</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="age"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Возраст</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="position"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Позиция</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Выберите позицию" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="goalkeeper">Вратарь</SelectItem>
-                        <SelectItem value="defender">Защитник</SelectItem>
-                        <SelectItem value="midfielder">Полузащитник</SelectItem>
-                        <SelectItem value="forward">Нападающий</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="matches"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Матчи</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="goals"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Голы</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={playerForm.control}
-                name="assists"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Передачи</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {playerForm.watch('position') === 'goalkeeper' && (
-                <FormField
-                  control={playerForm.control}
-                  name="cleanSheets"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Сухие матчи</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value, 10))} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              <FormField
-                control={playerForm.control}
-                name="photoUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL фотографии</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/photo.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsEditPlayerOpen(false)}>
-                  Отмена
-                </Button>
-                <Button type="submit" disabled={updatePlayerMutation.isPending}>
-                  {updatePlayerMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Сохранение...
-                    </>
-                  ) : (
-                    'Сохранить изменения'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+          <PlayerForm player={selectedPlayer} onSuccess={() => setIsEditPlayerOpen(false)} />
         </DialogContent>
       </Dialog>
 
-      {/* Delete Player Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Подтверждение удаления</DialogTitle>
-            <DialogDescription>
-              Вы уверены, что хотите удалить этого игрока? Это действие нельзя отменить.
-            </DialogDescription>
           </DialogHeader>
+          <p>Вы уверены, что хотите удалить этого игрока? Это действие нельзя отменить.</p>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Отмена
             </Button>
             <Button
-              type="button"
               variant="destructive"
               onClick={() => playerToDelete && deletePlayerMutation.mutate(playerToDelete)}
               disabled={deletePlayerMutation.isPending}
