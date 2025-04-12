@@ -904,7 +904,7 @@ const BlogContent = () => {
                         />
                       </div>
                     )}
-                    <CardContent className={`p-4 ${post.imageUrl ?` 'md:w-3/4' : 'w-full'}`}>
+                    <CardContent className={`p-4 ${post.imageUrl ? 'md:w-3/4' : 'w-full'}`}>
                       <div className="flex items-center mb-3">
                         {post.authorAvatar && (
                           <img 
