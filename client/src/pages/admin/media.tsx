@@ -8,7 +8,7 @@ import AdminLayout from './layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -27,10 +27,13 @@ import { Label } from "@/components/ui/label";
 
 export default function AdminMedia() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'photo' | 'video'>('photo');
   const [url, setUrl] = useState('');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -53,8 +56,29 @@ export default function AdminMedia() {
         title: 'Успешно',
         description: 'Медиа успешно добавлено',
       });
-      setIsDialogOpen(false);
-      resetForm();
+      closeDialog();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Ошибка',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const updateMediaMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Media> }) => {
+      const res = await apiRequest('PUT', `/api/media/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      toast({
+        title: 'Успешно',
+        description: 'Медиа успешно обновлено',
+      });
+      closeDialog();
     },
     onError: (error: Error) => {
       toast({
@@ -90,18 +114,44 @@ export default function AdminMedia() {
     setDescription('');
     setType('photo');
     setUrl('');
+    setSelectedMedia(null);
+    setIsEditMode(false);
+  };
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    resetForm();
+  };
+
+  const handleEdit = (media: Media) => {
+    setSelectedMedia(media);
+    setTitle(media.title || '');
+    setDescription(media.description || '');
+    setType(media.type as 'photo' | 'video');
+    setUrl(media.url);
+    setIsEditMode(true);
+    setIsDialogOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !url) return;
 
-    await addMediaMutation.mutateAsync({
+    const mediaData = {
       type,
       title,
       description,
       url,
-    });
+    };
+
+    if (isEditMode && selectedMedia?.id) {
+      await updateMediaMutation.mutateAsync({
+        id: selectedMedia.id,
+        data: mediaData,
+      });
+    } else {
+      await addMediaMutation.mutateAsync(mediaData);
+    }
   };
 
   return (
@@ -118,7 +168,7 @@ export default function AdminMedia() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Добавить медиа</DialogTitle>
+              <DialogTitle>{isEditMode ? 'Редактировать медиа' : 'Добавить медиа'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
@@ -159,11 +209,14 @@ export default function AdminMedia() {
                 </div>
               </div>
               <DialogFooter className="mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={closeDialog}>
                   Отмена
                 </Button>
-                <Button type="submit" disabled={addMediaMutation.isPending}>
-                  Добавить
+                <Button 
+                  type="submit" 
+                  disabled={addMediaMutation.isPending || updateMediaMutation.isPending}
+                >
+                  {isEditMode ? 'Сохранить' : 'Добавить'}
                 </Button>
               </DialogFooter>
             </form>
@@ -173,7 +226,7 @@ export default function AdminMedia() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {media.map((item) => (
             <Card key={item.id}>
-              <CardContent>
+              <CardContent className="p-4">
                 {item.type === 'photo' ? (
                   <img src={item.url} alt={item.title} className="w-full h-48 object-cover mb-4" />
                 ) : (
@@ -183,7 +236,14 @@ export default function AdminMedia() {
                 <p className="text-gray-600 whitespace-pre-wrap mb-4">{item.description}</p>
                 <p className="text-sm text-gray-500">{new Date(item.date).toLocaleDateString('ru-RU')}</p>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => item.id && handleEdit(item)}
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="destructive"
                   size="sm"
