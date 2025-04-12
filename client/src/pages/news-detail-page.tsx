@@ -45,7 +45,7 @@ export default function NewsDetailPage() {
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
               <span className="flex items-center">
                 <Calendar className="mr-1 h-4 w-4" />
-                {format(new Date(news.publishDate), 'd MMMM yyyy', { locale: ru })}
+                {news.publishDate ? format(new Date(news.publishDate), 'd MMMM yyyy', { locale: ru }) : ''}
               </span>
               <span className="flex items-center">
                 <Eye className="mr-1 h-4 w-4" />
