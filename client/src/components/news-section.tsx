@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { News } from '@shared/schema';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,11 @@ export default function NewsSection() {
   const regularNews = news && news.length > 3 ? news.slice(3, 6) : [];
 
   const formatDate = (date: string) => {
-    return format(new Date(date), 'd MMMM yyyy', { locale: ru });
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return 'Invalid date';
+    }
+    return format(parsedDate, 'd MMM yyyy', { locale: ru });
   };
 
   return (
@@ -35,7 +38,7 @@ export default function NewsSection() {
             Все новости <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
-        
+
         {isLoading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary-blue" />
@@ -71,7 +74,7 @@ export default function NewsSection() {
                   </div>
                 </div>
               )}
-              
+
               {/* Secondary News */}
               <div className="flex flex-col gap-6">
                 {secondaryNews.map(newsItem => (
@@ -97,7 +100,7 @@ export default function NewsSection() {
                 ))}
               </div>
             </div>
-            
+
             {/* News Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {regularNews.map(newsItem => (
