@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { News } from '@shared/schema';
 import { Button } from '@/components/ui/button';
