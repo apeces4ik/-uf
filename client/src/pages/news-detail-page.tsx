@@ -1,5 +1,5 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { News } from '@shared/schema';
 import { getQueryFn } from '@/lib/queryClient';

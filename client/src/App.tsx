@@ -25,7 +25,10 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { AdminProtectedRoute } from "./lib/admin-protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 import "@/lib/fonts";
-import NewsDetailPage from "@/pages/news-detail-page"; //Import the new component
+import NewsDetailPage from "@/pages/news-detail-page";
+
+        {/* News Detail Route */}
+        <Route path="/news/:id" component={NewsDetailPage} />
 
 
 function Router() {
