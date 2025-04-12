@@ -899,7 +899,7 @@ const BlogContent = () => {
                       <div className="md:w-1/4 h-48 md:h-auto">
                         <img 
                           src={post.imageUrl} 
-                          alt={post.title} 
+                                                    alt={post.title} 
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -946,7 +946,7 @@ const MediaContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление медиа</h1>
-      {/* Media management content */}
+      <p>Здесь будет контент для управления медиа.</p>
     </div>
   );
 };
@@ -956,7 +956,7 @@ const StandingsContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление турнирной таблицей</h1>
-      {/* Standings management content */}
+      <p>Здесь будет контент для управления турнирной таблицей.</p>
     </div>
   );
 };
@@ -966,7 +966,7 @@ const MessagesContent = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Сообщения от пользователей</h1>
-      {/* Messages management content */}
+      <p>Здесь будет контент для управления сообщениями.</p>
     </div>
   );
 };
