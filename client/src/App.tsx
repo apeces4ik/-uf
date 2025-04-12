@@ -1,5 +1,6 @@
 
 import { Switch, Route } from 'wouter';
+import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -23,8 +24,9 @@ import NotFound from '@/pages/not-found';
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/team" component={TeamPage} />
@@ -42,6 +44,7 @@ export default function App() {
         </Switch>
         <Toaster />
       </AuthProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
