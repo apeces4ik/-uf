@@ -10,7 +10,12 @@ import BlogForm from '@/components/admin/blog-form';
 import HistoryAdmin from '@/pages/admin/history-admin';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Loader2, Pencil, Trash } from 'lucide-react';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useMutation } from '@tanstack/react-query';
 
 const AdminPage = () => {
   const { user } = useAuth();
@@ -217,6 +222,37 @@ const PlayersContent = () => {
     queryKey: ['/api/players'],
   });
 
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const deletePlayerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/players/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete player');
+    },
+    onSuccess: () => {
+      refetch();
+      setIsDeleteOpen(false);
+      toast({
+        title: "Успешно",
+        description: "Игрок был удален",
+      });
+    },
+  });
+
+  const handleEdit = (player: Player) => {
+    setSelectedPlayer(player);
+    setIsEditOpen(true);
+  };
+
+  const handleDelete = (player: Player) => {
+    setSelectedPlayer(player);
+    setIsDeleteOpen(true);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Управление игроками</h1>
@@ -251,9 +287,9 @@ const PlayersContent = () => {
                       <div className="text-white font-medium">{player.position}</div>
                     </div>
                   </div>
-                  <CardContent className="p-4 text-center">
-                    <h3 className="font-roboto-condensed font-bold text-lg">{player.name}</h3>
-                    <div className="flex justify-center items-center mt-2 space-x-4">
+                  <CardContent className="p-4">
+                    <h3 className="font-roboto-condensed font-bold text-lg text-center mb-2">{player.name}</h3>
+                    <div className="flex justify-center items-center mt-2 space-x-4 mb-4">
                       <div className="text-center">
                         <div className="text-sm text-gray-500">Возраст</div>
                         <div className="font-medium">{player.age}</div>
@@ -273,6 +309,24 @@ const PlayersContent = () => {
                         </div>
                       </div>
                     </div>
+                    <div className="flex justify-center gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(player)}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Изменить
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(player)}
+                      >
+                        <Trash className="h-4 w-4 mr-1" />
+                        Удалить
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -284,6 +338,49 @@ const PlayersContent = () => {
           <PlayerForm onSuccess={() => refetch()} />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Редактировать игрока</DialogTitle>
+          </DialogHeader>
+          {selectedPlayer && (
+            <PlayerForm 
+              player={selectedPlayer} 
+              onSuccess={() => {
+                refetch();
+                setIsEditOpen(false);
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить игрока</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить этого игрока? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedPlayer && deletePlayerMutation.mutate(selectedPlayer.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletePlayerMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Удалить"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
