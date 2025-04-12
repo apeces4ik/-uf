@@ -127,16 +127,7 @@ const NewsPage = () => {
                               <a href="#" className="text-secondary-blue font-medium hover:underline">
                                 Читать полностью
                               </a>
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                <span className="flex items-center">
-                                  <Eye className="mr-1 h-4 w-4" />
-                                  {item.views}
-                                </span>
-                                <span className="flex items-center">
-                                  <MessageSquare className="mr-1 h-4 w-4" />
-                                  {item.comments}
-                                </span>
-                              </div>
+                              
                             </div>
                           </div>
                         </div>
